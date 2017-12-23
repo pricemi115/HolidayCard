@@ -1,0 +1,548 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 48;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		566121831FEDE91300CB66D3 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 566121821FEDE91300CB66D3 /* AppDelegate.swift */; };
+		566121851FEDE91300CB66D3 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 566121841FEDE91300CB66D3 /* ViewController.swift */; };
+		566121871FEDE91300CB66D3 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 566121861FEDE91300CB66D3 /* Assets.xcassets */; };
+		5661218A1FEDE91300CB66D3 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 566121881FEDE91300CB66D3 /* Main.storyboard */; };
+		566121961FEDE91300CB66D3 /* HolidayCardTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 566121951FEDE91300CB66D3 /* HolidayCardTests.swift */; };
+		566121A11FEDE91300CB66D3 /* HolidayCardUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 566121A01FEDE91300CB66D3 /* HolidayCardUITests.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		566121921FEDE91300CB66D3 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 566121771FEDE91300CB66D3 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 5661217E1FEDE91300CB66D3;
+			remoteInfo = HolidayCard;
+		};
+		5661219D1FEDE91300CB66D3 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 566121771FEDE91300CB66D3 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 5661217E1FEDE91300CB66D3;
+			remoteInfo = HolidayCard;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		5661217F1FEDE91300CB66D3 /* HolidayCard.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = HolidayCard.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		566121821FEDE91300CB66D3 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		566121841FEDE91300CB66D3 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
+		566121861FEDE91300CB66D3 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		566121891FEDE91300CB66D3 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
+		5661218B1FEDE91300CB66D3 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		5661218C1FEDE91300CB66D3 /* HolidayCard.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = HolidayCard.entitlements; sourceTree = "<group>"; };
+		566121911FEDE91300CB66D3 /* HolidayCardTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = HolidayCardTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		566121951FEDE91300CB66D3 /* HolidayCardTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HolidayCardTests.swift; sourceTree = "<group>"; };
+		566121971FEDE91300CB66D3 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		5661219C1FEDE91300CB66D3 /* HolidayCardUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = HolidayCardUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		566121A01FEDE91300CB66D3 /* HolidayCardUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HolidayCardUITests.swift; sourceTree = "<group>"; };
+		566121A21FEDE91300CB66D3 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		5661217C1FEDE91300CB66D3 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		5661218E1FEDE91300CB66D3 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		566121991FEDE91300CB66D3 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		566121761FEDE91300CB66D3 = {
+			isa = PBXGroup;
+			children = (
+				566121811FEDE91300CB66D3 /* HolidayCard */,
+				566121941FEDE91300CB66D3 /* HolidayCardTests */,
+				5661219F1FEDE91300CB66D3 /* HolidayCardUITests */,
+				566121801FEDE91300CB66D3 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		566121801FEDE91300CB66D3 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				5661217F1FEDE91300CB66D3 /* HolidayCard.app */,
+				566121911FEDE91300CB66D3 /* HolidayCardTests.xctest */,
+				5661219C1FEDE91300CB66D3 /* HolidayCardUITests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		566121811FEDE91300CB66D3 /* HolidayCard */ = {
+			isa = PBXGroup;
+			children = (
+				566121821FEDE91300CB66D3 /* AppDelegate.swift */,
+				566121841FEDE91300CB66D3 /* ViewController.swift */,
+				566121861FEDE91300CB66D3 /* Assets.xcassets */,
+				566121881FEDE91300CB66D3 /* Main.storyboard */,
+				5661218B1FEDE91300CB66D3 /* Info.plist */,
+				5661218C1FEDE91300CB66D3 /* HolidayCard.entitlements */,
+			);
+			path = HolidayCard;
+			sourceTree = "<group>";
+		};
+		566121941FEDE91300CB66D3 /* HolidayCardTests */ = {
+			isa = PBXGroup;
+			children = (
+				566121951FEDE91300CB66D3 /* HolidayCardTests.swift */,
+				566121971FEDE91300CB66D3 /* Info.plist */,
+			);
+			path = HolidayCardTests;
+			sourceTree = "<group>";
+		};
+		5661219F1FEDE91300CB66D3 /* HolidayCardUITests */ = {
+			isa = PBXGroup;
+			children = (
+				566121A01FEDE91300CB66D3 /* HolidayCardUITests.swift */,
+				566121A21FEDE91300CB66D3 /* Info.plist */,
+			);
+			path = HolidayCardUITests;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		5661217E1FEDE91300CB66D3 /* HolidayCard */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 566121A51FEDE91300CB66D3 /* Build configuration list for PBXNativeTarget "HolidayCard" */;
+			buildPhases = (
+				5661217B1FEDE91300CB66D3 /* Sources */,
+				5661217C1FEDE91300CB66D3 /* Frameworks */,
+				5661217D1FEDE91300CB66D3 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = HolidayCard;
+			productName = HolidayCard;
+			productReference = 5661217F1FEDE91300CB66D3 /* HolidayCard.app */;
+			productType = "com.apple.product-type.application";
+		};
+		566121901FEDE91300CB66D3 /* HolidayCardTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 566121A81FEDE91300CB66D3 /* Build configuration list for PBXNativeTarget "HolidayCardTests" */;
+			buildPhases = (
+				5661218D1FEDE91300CB66D3 /* Sources */,
+				5661218E1FEDE91300CB66D3 /* Frameworks */,
+				5661218F1FEDE91300CB66D3 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				566121931FEDE91300CB66D3 /* PBXTargetDependency */,
+			);
+			name = HolidayCardTests;
+			productName = HolidayCardTests;
+			productReference = 566121911FEDE91300CB66D3 /* HolidayCardTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		5661219B1FEDE91300CB66D3 /* HolidayCardUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 566121AB1FEDE91300CB66D3 /* Build configuration list for PBXNativeTarget "HolidayCardUITests" */;
+			buildPhases = (
+				566121981FEDE91300CB66D3 /* Sources */,
+				566121991FEDE91300CB66D3 /* Frameworks */,
+				5661219A1FEDE91300CB66D3 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				5661219E1FEDE91300CB66D3 /* PBXTargetDependency */,
+			);
+			name = HolidayCardUITests;
+			productName = HolidayCardUITests;
+			productReference = 5661219C1FEDE91300CB66D3 /* HolidayCardUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		566121771FEDE91300CB66D3 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastSwiftUpdateCheck = 0920;
+				LastUpgradeCheck = 0920;
+				ORGANIZATIONNAME = GrumpTech;
+				TargetAttributes = {
+					5661217E1FEDE91300CB66D3 = {
+						CreatedOnToolsVersion = 9.2;
+						ProvisioningStyle = Automatic;
+					};
+					566121901FEDE91300CB66D3 = {
+						CreatedOnToolsVersion = 9.2;
+						ProvisioningStyle = Automatic;
+						TestTargetID = 5661217E1FEDE91300CB66D3;
+					};
+					5661219B1FEDE91300CB66D3 = {
+						CreatedOnToolsVersion = 9.2;
+						ProvisioningStyle = Automatic;
+						TestTargetID = 5661217E1FEDE91300CB66D3;
+					};
+				};
+			};
+			buildConfigurationList = 5661217A1FEDE91300CB66D3 /* Build configuration list for PBXProject "HolidayCard" */;
+			compatibilityVersion = "Xcode 8.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 566121761FEDE91300CB66D3;
+			productRefGroup = 566121801FEDE91300CB66D3 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				5661217E1FEDE91300CB66D3 /* HolidayCard */,
+				566121901FEDE91300CB66D3 /* HolidayCardTests */,
+				5661219B1FEDE91300CB66D3 /* HolidayCardUITests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		5661217D1FEDE91300CB66D3 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				566121871FEDE91300CB66D3 /* Assets.xcassets in Resources */,
+				5661218A1FEDE91300CB66D3 /* Main.storyboard in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		5661218F1FEDE91300CB66D3 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		5661219A1FEDE91300CB66D3 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		5661217B1FEDE91300CB66D3 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				566121851FEDE91300CB66D3 /* ViewController.swift in Sources */,
+				566121831FEDE91300CB66D3 /* AppDelegate.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		5661218D1FEDE91300CB66D3 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				566121961FEDE91300CB66D3 /* HolidayCardTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		566121981FEDE91300CB66D3 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				566121A11FEDE91300CB66D3 /* HolidayCardUITests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		566121931FEDE91300CB66D3 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 5661217E1FEDE91300CB66D3 /* HolidayCard */;
+			targetProxy = 566121921FEDE91300CB66D3 /* PBXContainerItemProxy */;
+		};
+		5661219E1FEDE91300CB66D3 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 5661217E1FEDE91300CB66D3 /* HolidayCard */;
+			targetProxy = 5661219D1FEDE91300CB66D3 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin PBXVariantGroup section */
+		566121881FEDE91300CB66D3 /* Main.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				566121891FEDE91300CB66D3 /* Base */,
+			);
+			name = Main.storyboard;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		566121A31FEDE91300CB66D3 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "-";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.13;
+				MTL_ENABLE_DEBUG_INFO = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		566121A41FEDE91300CB66D3 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "-";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.13;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				SDKROOT = macosx;
+				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
+			};
+			name = Release;
+		};
+		566121A61FEDE91300CB66D3 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = HolidayCard/HolidayCard.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				INFOPLIST_FILE = HolidayCard/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = com.GrumpTech.HolidayCard;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 4.0;
+			};
+			name = Debug;
+		};
+		566121A71FEDE91300CB66D3 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = HolidayCard/HolidayCard.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				INFOPLIST_FILE = HolidayCard/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = com.GrumpTech.HolidayCard;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 4.0;
+			};
+			name = Release;
+		};
+		566121A91FEDE91300CB66D3 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				INFOPLIST_FILE = HolidayCardTests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = com.GrumpTech.HolidayCardTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 4.0;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/HolidayCard.app/Contents/MacOS/HolidayCard";
+			};
+			name = Debug;
+		};
+		566121AA1FEDE91300CB66D3 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				INFOPLIST_FILE = HolidayCardTests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = com.GrumpTech.HolidayCardTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 4.0;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/HolidayCard.app/Contents/MacOS/HolidayCard";
+			};
+			name = Release;
+		};
+		566121AC1FEDE91300CB66D3 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				INFOPLIST_FILE = HolidayCardUITests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = com.GrumpTech.HolidayCardUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 4.0;
+				TEST_TARGET_NAME = HolidayCard;
+			};
+			name = Debug;
+		};
+		566121AD1FEDE91300CB66D3 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				INFOPLIST_FILE = HolidayCardUITests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = com.GrumpTech.HolidayCardUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 4.0;
+				TEST_TARGET_NAME = HolidayCard;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		5661217A1FEDE91300CB66D3 /* Build configuration list for PBXProject "HolidayCard" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				566121A31FEDE91300CB66D3 /* Debug */,
+				566121A41FEDE91300CB66D3 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		566121A51FEDE91300CB66D3 /* Build configuration list for PBXNativeTarget "HolidayCard" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				566121A61FEDE91300CB66D3 /* Debug */,
+				566121A71FEDE91300CB66D3 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		566121A81FEDE91300CB66D3 /* Build configuration list for PBXNativeTarget "HolidayCardTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				566121A91FEDE91300CB66D3 /* Debug */,
+				566121AA1FEDE91300CB66D3 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		566121AB1FEDE91300CB66D3 /* Build configuration list for PBXNativeTarget "HolidayCardUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				566121AC1FEDE91300CB66D3 /* Debug */,
+				566121AD1FEDE91300CB66D3 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 566121771FEDE91300CB66D3 /* Project object */;
+}
