@@ -1,16 +1,19 @@
 //
-//  AppDelegate.swift
-//  HolidayCard
+//  @class:         AppDelegate.swift
+//  @application:   HolidayCard
 //
-//  Created by Michael Price on 12/22/17.
+//  Created by Michael Price on 22-DEC-2017.
 //  Copyright © 2017 GrumpTech. All rights reserved.
+//
+//  @desc:          Application Delegate for HolidayCard
 //
 
 import Cocoa
 
 @NSApplicationMain
-class AppDelegate: NSObject, NSApplicationDelegate {
-
+class AppDelegate: NSObject, NSApplicationDelegate
+{
+    // MARK: Initializer/Deinitializer
     //
     // @desc:   Application Initializer
     //
@@ -22,6 +25,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     //
     func applicationDidFinishLaunching(_ aNotification: Notification)
     {
+        // Register for the "HolidayCard Error" notification event.
+        let nc = NotificationCenter.default
+        nc.addObserver(self, selector: #selector(self.showError(_:)), name: Notification.Name.HCHolidayCardError, object: nil)
+        
         // Ensure that the application will have permission to access the
         // contacts database.
         // Note: This will be performed on a background thread.
@@ -63,7 +70,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
     
     //
-    // @desc:   Application Destructor
+    // @desc:   Application De-Initializer
     //
     // @param:  Unused
     //
@@ -75,7 +82,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     {
         // Nothing needed.
     }
+    // MARK: end Initializer/Deinitializer
     
+    // MARK: Action Handlers
     //
     // @desc:   Event handler for the custom backup menu selection
     //
@@ -85,7 +94,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     //
     // @remarks:None
     //
-    @IBAction func mnuBackup_DoClick(_ sender: Any)
+    @IBAction fileprivate func mnuBackup_DoClick(_ sender: Any)
     {
         var success:Bool = false
         
@@ -125,7 +134,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     //
     // @remarks:None
     //
-    @IBAction func mnuHelp_ShowHelp(_ sender: Any)
+    @IBAction fileprivate func mnuHelp_ShowHelp(_ sender: Any)
     {
         // The application is documented online via a GitHub Wiki.
         let helpPage:String = "https://github.com/pricemi115/HolidayCard/wiki"
@@ -138,8 +147,52 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             (!workspace.open(url!)))
         {
             // Failed to show help.
-            print("Unable to open webpage: '\(helpPage)'")
+
+            // Get the stack trace
+            var stackTrace:String = "Stack Trace:"
+            Thread.callStackSymbols.forEach{stackTrace = stackTrace + "\n" + $0}
+            
+            let errDesc:String = "Unable to open help page. Info:\(helpPage)"
+            let errData:HolidayCardError = HolidayCardError(err: errDesc, stack: stackTrace, style: HolidayCardError.Style.Warning)
+            
+            // Post the error for reporting.
+            let err:[String:HolidayCardError] = ["error":errData]
+            let nc:NotificationCenter = NotificationCenter.default
+            nc.post(name: Notification.Name.HCHolidayCardError, object: nil, userInfo: err)
         }
     }
+    // MARK: end Action Handlers
+    
+    // MARK: Private methods
+    //
+    // @desc:   Helper to notify the user of an error
+    //
+    // @param:  error: Holiday Card error
+    //
+    // @return: None
+    //
+    // @remarks:None
+    //
+    @objc func showError(_ notification:NSNotification) -> Void
+    {
+        // Get the error
+        let error:HolidayCardError? = notification.userInfo?["error"] as? HolidayCardError
+        
+        if (error != nil)
+        {
+            // Notify the user on the primary application thread.
+            DispatchQueue.main.async
+            {
+                // Notify the user.
+                let alert: NSAlert = NSAlert()
+                alert.messageText = "Error notification"
+                alert.alertStyle = (error?.Style)!
+                alert.informativeText = (error?.Description)! + "\n\n" + (error?.StackTrace)!
+                alert.addButton(withTitle: "Ok")
+                alert.runModal()
+            }
+        }
+    }
+    // MARK: end Private methods
 }
 

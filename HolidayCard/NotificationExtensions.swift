@@ -15,5 +15,6 @@ import Foundation
 //
 extension Notification.Name
 {
-    static let CNPermissionGranted = Notification.Name("CNPermissionGranted")
+    static let CNPermissionGranted  = Notification.Name("CNPermissionGranted")
+    static let HCHolidayCardError   = Notification.Name("HCHolidayCardError")
 }

@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		5660042A2001ADC5005B4781 /* NotificationExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 566004292001ADC5005B4781 /* NotificationExtensions.swift */; };
+		5660042C2001C231005B4781 /* HolidayCardErrors.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5660042B2001C231005B4781 /* HolidayCardErrors.swift */; };
 		566121831FEDE91300CB66D3 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 566121821FEDE91300CB66D3 /* AppDelegate.swift */; };
 		566121851FEDE91300CB66D3 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 566121841FEDE91300CB66D3 /* ViewController.swift */; };
 		566121871FEDE91300CB66D3 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 566121861FEDE91300CB66D3 /* Assets.xcassets */; };
@@ -37,6 +38,7 @@
 
 /* Begin PBXFileReference section */
 		566004292001ADC5005B4781 /* NotificationExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationExtensions.swift; sourceTree = "<group>"; };
+		5660042B2001C231005B4781 /* HolidayCardErrors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HolidayCardErrors.swift; sourceTree = "<group>"; };
 		5661217F1FEDE91300CB66D3 /* HolidayCard.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = HolidayCard.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		566121821FEDE91300CB66D3 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		566121841FEDE91300CB66D3 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
@@ -113,6 +115,7 @@
 				5661218C1FEDE91300CB66D3 /* HolidayCard.entitlements */,
 				566121AE1FEF385B00CB66D3 /* HolidayCardProcessor.swift */,
 				566004292001ADC5005B4781 /* NotificationExtensions.swift */,
+				5660042B2001C231005B4781 /* HolidayCardErrors.swift */,
 			);
 			path = HolidayCard;
 			sourceTree = "<group>";
@@ -293,6 +296,7 @@
 			files = (
 				566121851FEDE91300CB66D3 /* ViewController.swift in Sources */,
 				566121831FEDE91300CB66D3 /* AppDelegate.swift in Sources */,
+				5660042C2001C231005B4781 /* HolidayCardErrors.swift in Sources */,
 				5660042A2001ADC5005B4781 /* NotificationExtensions.swift in Sources */,
 				566121AF1FEF385B00CB66D3 /* HolidayCardProcessor.swift in Sources */,
 			);
