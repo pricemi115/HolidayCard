@@ -18,6 +18,7 @@ class ViewController: NSViewController {
     @IBOutlet weak var _selRelationLabels: NSPopUpButton!
     @IBOutlet weak var _prgBusyIndicator: NSProgressIndicator!
     @IBOutlet weak var _btnGenerateList: NSButton!
+    @IBOutlet weak var _btnResetMailingList: NSButton!
     // MARK: end Properties
     
     // MARK: Data Members
@@ -35,32 +36,30 @@ class ViewController: NSViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        // Create/Initialize the Holiday Card Processor
-        _hcp = HolidayCardProcessor()
+        // Just initialize the UI
         
-        // Get the list of contact groups available.
-        let groups:[String] = _hcp.GetContactGroups
-        // Reset/Re-Populate the group selection lists.
         _selGroupSource.removeAllItems()
+        _selGroupSource.isEnabled = false
         _selGroupDestination.removeAllItems()
-        for name in groups
-        {
-            _selGroupSource.addItem(withTitle: name)
-            _selGroupDestination.addItem(withTitle: name)
-        }
-        
-        // Initialize the postal address options.
-        resetPostalAddressOptions()
-        
-        // Initialize the contact relation options.
-        resetRelationNameOptions()
-        
-        
+        _selGroupDestination.isEnabled = false
+        _selRelationLabels.removeAllItems()
+        _selRelationLabels.isEnabled = false
+        _selPostalAddressLabels.removeAllItems()
+        _selPostalAddressLabels.isEnabled = false
+
         // Initialize the busy indicator
-        _prgBusyIndicator.isHidden = true
+        _prgBusyIndicator.usesThreadedAnimation = true
+        _prgBusyIndicator.startAnimation(self)
         
         // Set focus to the generate button
+        _btnGenerateList.isEnabled = false
         _btnGenerateList.becomeFirstResponder()
+        
+        _btnResetMailingList.isEnabled = false
+        
+        // Register for the "PermissionGranted" notification event.
+        let nc = NotificationCenter.default
+        nc.addObserver(self, selector: #selector(InitializeUI), name: Notification.Name.CNPermissionGranted, object: nil)
     }
 
     override var representedObject: Any? {
@@ -69,6 +68,8 @@ class ViewController: NSViewController {
         }
     }
 
+    // MARK: Public Methods
+    // MARK: end Publix Methods
 
     // MARK: Action Handlers
     //
@@ -196,6 +197,52 @@ class ViewController: NSViewController {
         {
             _selRelationLabels.addItem(withTitle: name)
         }
+    }
+    
+    //
+    // @desc:   Helper to initialize the view controler at the appropriate time.
+    //
+    // @param:  None
+    //
+    // @return: None
+    //
+    // @remarks:Invoked via NotificationCenter event raised from the AppDelegate.
+    //
+    @objc fileprivate func InitializeUI() -> Void
+    {
+        // Stop the busy indicator
+        _prgBusyIndicator.stopAnimation(self)
+        
+        // Create/Initialize the Holiday Card Processor
+        _hcp = HolidayCardProcessor()
+        
+        // Get the list of contact groups available.
+        let groups:[String] = _hcp.GetContactGroups
+        // Reset/Re-Populate the group selection lists.
+        _selGroupSource.removeAllItems()
+        _selGroupDestination.removeAllItems()
+        for name in groups
+        {
+            _selGroupSource.addItem(withTitle: name)
+            _selGroupDestination.addItem(withTitle: name)
+        }
+        
+        // Initialize the postal address options.
+        resetPostalAddressOptions()
+        
+        // Initialize the contact relation options.
+        resetRelationNameOptions()
+        
+        // Update the ui control elements
+        _selGroupSource.isEnabled = true
+        _selGroupDestination.isEnabled = true
+        _selRelationLabels.isEnabled = true
+        _selPostalAddressLabels.isEnabled = true
+        _btnGenerateList.isEnabled = true
+        _btnResetMailingList.isEnabled = true
+        
+        // Set focus to the generate button
+        _btnGenerateList.becomeFirstResponder()
     }
     // MARK: end Private helper methods
 }

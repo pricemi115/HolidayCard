@@ -1,11 +1,11 @@
 //
-//  Class:          HolidayCardProcessor.swift
-//  Application:    HolidayCard
+//  @class:          HolidayCardProcessor.swift
+//  @application:    HolidayCard
 //
 //  Created by Michael Price on 12/23/17.
 //  Copyright © 2017 GrumpTech. All rights reserved.
 //
-//  Description:    Responsible for managing integration with the Contacts database
+//  @desc:          Responsible for managing integration with the Contacts database
 //                  for the purpose of generating a "Holiday Card" mailing list.
 //
 //                  This utility class assumes the following:
@@ -36,9 +36,9 @@ class HolidayCardProcessor : NSObject
     //
     // Return:      true if permission is granted.
     //
-    // Remarks:     Throws HolidayCardProcessor_ContactException exception if access is restricted.
+    // Remarks:     This method will block, waiting for the user to respond, when the current permission is set to "Not Defined"
     //
-    func requestPermission() -> Bool
+    func determinePermission() -> Bool
     {
         var permissionStatus: (permissionGranted:Bool, alertable:Bool) = self.IsContactPermissionGranted!
 
@@ -48,21 +48,24 @@ class HolidayCardProcessor : NSObject
             // Not granted.
             if (permissionStatus.alertable)
             {
+                var waitingForResponse:Bool = true
+                
                 // Permission Not Granted,
                 // But we can request it....
                 let contactStore = CNContactStore()
+                // This is done on a background thread.
                 contactStore.requestAccess(for: .contacts, completionHandler:{ (success, error) in
-                    if (success)
-                    {
-                        // Update the flag now that we are permitted.
-                        permissionStatus.permissionGranted = true
-                        print("Access Allowed")
-                    }
-                    else
-                    {
-                        print("Access Declined")
-                    }
+                    permissionStatus.permissionGranted = success && (error == nil)
+                    
+                    // Done waiting.
+                    waitingForResponse = false
                 })
+                
+                // Wait until the user has responded.
+                while (waitingForResponse)
+                {
+                    // Do nothing.
+                }
             }
         }
         else
@@ -164,7 +167,7 @@ class HolidayCardProcessor : NSObject
     func BackupContacts() -> Bool
     {
         var success:Bool = false
-        
+
         // List of contacts
         var backupList:[CNContact] = [CNContact]()
         
@@ -429,23 +432,27 @@ class HolidayCardProcessor : NSObject
 
     // MARK: -- Public properties
     //
-    // Description: Read-only property accessor to determine if permission to access the contacts database has been granted.
+    // @desc: Read-only property accessor to determine if permission to access the contacts database has been granted.
     //
-    // Arguments:   None
+    // @paeam:  None
     //
-    // Return:      Tuple -
+    // @eeturn: Tuple -
     //              permissionGranted:  true if permission to the contacts database has been authorized.
     //              alertable:          true if permission has not been authorized but simply requires the user to manually grant access.
     //
-    // Remarks:     None
+    // @remark: To reset the privacy permissions, use terminal to execute: tccutil reset AddressBook
+    // @remark: throws an permission exception if permissions are not yet determined.
     //
     var IsContactPermissionGranted: (permissionGranted: Bool, alertable: Bool)!
     {
         get
         {
-            let authStatus: CNAuthorizationStatus = CNContactStore.authorizationStatus(for: CNEntityType.contacts)
+            let authStatus: CNAuthorizationStatus = CNAuthorizationStatus.notDetermined//  CNContactStore.authorizationStatus(for: CNEntityType.contacts)
+            
+            let permissionAuthorized = (authStatus == CNAuthorizationStatus.authorized)
+            let permissionAlertable = !permissionAuthorized && (authStatus != CNAuthorizationStatus.denied)
 
-            return ((authStatus == CNAuthorizationStatus.authorized), (authStatus == CNAuthorizationStatus.denied))
+            return (permissionAuthorized, permissionAlertable)
         }
     }
     
