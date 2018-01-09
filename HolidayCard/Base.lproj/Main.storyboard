@@ -24,7 +24,7 @@
                                         </menuItem>
                                         <menuItem isSeparatorItem="YES" id="VOq-y0-SEH"/>
                                         <menuItem title="Preferences…" keyEquivalent="," id="BOF-NM-1cW"/>
-                                        <menuItem title="Backup" keyEquivalent="b" id="DUd-re-9DV">
+                                        <menuItem title="Backup" alternate="YES" keyEquivalent="b" allowsKeyEquivalentWhenHidden="YES" id="DUd-re-9DV">
                                             <connections>
                                                 <action selector="mnuBackup_DoClick:" target="Voe-Tx-rLC" id="KWd-pM-lgY"/>
                                             </connections>
@@ -449,7 +449,7 @@
                                     <items>
                                         <menuItem title="HolidayCard Help" keyEquivalent="?" id="FKE-Sm-Kum">
                                             <connections>
-                                                <action selector="showHelp:" target="Ady-hI-5gd" id="y7X-2Q-9no"/>
+                                                <action selector="mnuHelp_ShowHelp:" target="Voe-Tx-rLC" id="jxM-3z-4zK"/>
                                             </connections>
                                         </menuItem>
                                     </items>
@@ -627,7 +627,7 @@
                                     <real value="3.4028234663852886e+38"/>
                                 </customSpacing>
                             </stackView>
-                            <progressIndicator wantsLayer="YES" horizontalHuggingPriority="750" verticalHuggingPriority="750" maxValue="100" bezeled="NO" indeterminate="YES" style="spinning" translatesAutoresizingMaskIntoConstraints="NO" id="V7w-yt-jZT">
+                            <progressIndicator wantsLayer="YES" horizontalHuggingPriority="750" verticalHuggingPriority="750" maxValue="100" displayedWhenStopped="NO" bezeled="NO" indeterminate="YES" style="spinning" translatesAutoresizingMaskIntoConstraints="NO" id="V7w-yt-jZT">
                                 <rect key="frame" x="224" y="119" width="32" height="32"/>
                             </progressIndicator>
                             <stackView distribution="fill" orientation="vertical" alignment="leading" horizontalStackHuggingPriority="249.99998474121094" verticalStackHuggingPriority="249.99998474121094" detachesHiddenViews="YES" translatesAutoresizingMaskIntoConstraints="NO" id="NBj-gs-CVZ">
@@ -688,6 +688,7 @@
                     </view>
                     <connections>
                         <outlet property="_btnGenerateList" destination="KVq-Uw-mvM" id="YFM-bj-u4y"/>
+                        <outlet property="_btnResetMailingList" destination="7bM-Qq-tFg" id="LIk-j2-gbS"/>
                         <outlet property="_prgBusyIndicator" destination="V7w-yt-jZT" id="hM7-1y-eeB"/>
                         <outlet property="_selGroupDestination" destination="jK7-u2-Jv4" id="lhx-5p-wV5"/>
                         <outlet property="_selGroupSource" destination="eqZ-dQ-K93" id="fjH-24-Keg"/>
