@@ -1,11 +1,11 @@
 //
-//  Class:          HolidayCardProcessor.swift
-//  Application:    HolidayCard
+//  @class:          HolidayCardProcessor.swift
+//  @application:    HolidayCard
 //
 //  Created by Michael Price on 12/23/17.
 //  Copyright © 2017 GrumpTech. All rights reserved.
 //
-//  Description:    Responsible for managing integration with the Contacts database
+//  @desc:          Responsible for managing integration with the Contacts database
 //                  for the purpose of generating a "Holiday Card" mailing list.
 //
 //                  This utility class assumes the following:
@@ -36,9 +36,9 @@ class HolidayCardProcessor : NSObject
     //
     // Return:      true if permission is granted.
     //
-    // Remarks:     Throws HolidayCardProcessor_ContactException exception if access is restricted.
+    // Remarks:     This method will block, waiting for the user to respond, when the current permission is set to "Not Defined"
     //
-    func requestPermission() -> Bool
+    func determinePermission() -> Bool
     {
         var permissionStatus: (permissionGranted:Bool, alertable:Bool) = self.IsContactPermissionGranted!
 
@@ -48,26 +48,25 @@ class HolidayCardProcessor : NSObject
             // Not granted.
             if (permissionStatus.alertable)
             {
+                var waitingForResponse:Bool = true
+                
                 // Permission Not Granted,
                 // But we can request it....
                 let contactStore = CNContactStore()
+                // This is done on a background thread.
                 contactStore.requestAccess(for: .contacts, completionHandler:{ (success, error) in
-                    if (success)
-                    {
-                        // Update the flag now that we are permitted.
-                        permissionStatus.permissionGranted = true
-                        print("Access Allowed")
-                    }
-                    else
-                    {
-                        print("Access Declined")
-                    }
+                    permissionStatus.permissionGranted = success && (error == nil)
+                    
+                    // Done waiting.
+                    waitingForResponse = false
                 })
+                
+                // Block!!: Wait until the user has responded.
+                while (waitingForResponse)
+                {
+                    // Do nothing.
+                }
             }
-        }
-        else
-        {
-            print("Permission pre-approved")
         }
         
         return permissionStatus.permissionGranted
@@ -103,7 +102,17 @@ class HolidayCardProcessor : NSObject
             }
             catch
             {
-                print("GetGontactGroupContents(): Error getting contacts")
+                // Get the stack trace
+                var stackTrace:String = "Stack Trace:"
+                Thread.callStackSymbols.forEach{stackTrace = stackTrace + "\n" + $0}
+                
+                let errDesc:String = "Unable to get contact container contents."
+                let errData:HolidayCardError = HolidayCardError(err: errDesc, stack: stackTrace, style: HolidayCardError.Style.Critical)
+                
+                // Post the error for reporting.
+                let err:[String:HolidayCardError] = ["error":errData]
+                let nc:NotificationCenter = NotificationCenter.default
+                nc.post(name: Notification.Name.HCHolidayCardError, object: nil, userInfo: err)
             }
         }
         
@@ -127,7 +136,6 @@ class HolidayCardProcessor : NSObject
         guard (contactsToDelete.count > 0) else
         {
             // Nothing to do.
-            print("FlushAllContactsInTemp() - Nothing to Flush")
             return
         }
         
@@ -144,10 +152,19 @@ class HolidayCardProcessor : NSObject
         {
             let contactStore = CNContactStore()
             try contactStore.execute(requestToDelete)
-            print("Success, You deleted the user(s)")
         } catch let error
         {
-            print("FlushAllContactsInTemp() - Error = \(error)")
+            // Get the stack trace
+            var stackTrace:String = "Stack Trace:"
+            Thread.callStackSymbols.forEach{stackTrace = stackTrace + "\n" + $0}
+            
+            let errDesc:String = "Unable to flush contacts. Err:" + error.localizedDescription
+            let errData:HolidayCardError = HolidayCardError(err: errDesc, stack: stackTrace, style: HolidayCardError.Style.Critical)
+            
+            // Post the error for reporting.
+            let err:[String:HolidayCardError] = ["error":errData]
+            let nc:NotificationCenter = NotificationCenter.default
+            nc.post(name: Notification.Name.HCHolidayCardError, object: nil, userInfo: err)
         }
     }
     
@@ -164,7 +181,7 @@ class HolidayCardProcessor : NSObject
     func BackupContacts() -> Bool
     {
         var success:Bool = false
-        
+
         // List of contacts
         var backupList:[CNContact] = [CNContact]()
         
@@ -205,8 +222,18 @@ class HolidayCardProcessor : NSObject
         }
         catch let error
         {
-            // Do nothing/
-            print("Backup() - \(error)")
+            // Get the stack trace
+            var stackTrace:String = "Stack Trace:"
+            Thread.callStackSymbols.forEach{stackTrace = stackTrace + "\n" + $0}
+            
+            let errDesc:String = "Unable to generate contact database backup. Err:" + error.localizedDescription
+            let errData:HolidayCardError = HolidayCardError(err: errDesc, stack: stackTrace, style: HolidayCardError.Style.Critical)
+            
+            // Post the error for reporting.
+            let err:[String:HolidayCardError] = ["error":errData]
+            let nc:NotificationCenter = NotificationCenter.default
+            nc.post(name: Notification.Name.HCHolidayCardError, object: nil, userInfo: err)
+            
             success = false
         }
         
@@ -231,7 +258,14 @@ class HolidayCardProcessor : NSObject
         // Ensure that the source and destination are indeed different.
         guard (grpSource.caseInsensitiveCompare(grpDest) != .orderedSame) else
         {
-            print("GenerateHolidayList - Source & Destination are the same")
+            let errDesc:String = "GenerateHolidayList - Source & Destination are the same."
+            let errData:HolidayCardError = HolidayCardError(err: errDesc, stack: String(), style: HolidayCardError.Style.Informational)
+            
+            // Post the error for reporting.
+            let err:[String:HolidayCardError] = ["error":errData]
+            let nc:NotificationCenter = NotificationCenter.default
+            nc.post(name: Notification.Name.HCHolidayCardError, object: nil, userInfo: err)
+            
             return
         }
         
@@ -239,14 +273,28 @@ class HolidayCardProcessor : NSObject
         let holidayList:[CNContact] = GetHolidayList(groupSource: grpSource, addrSource: addrSource, relatedNameSource: relatedNameSource, valid: true)
         guard (holidayList.count > 0) else
         {
-            print("GenerateHolidayList - No contacts to build a list from.")
+            let errDesc:String = "GenerateHolidayList - No contacts to build a list from."
+            let errData:HolidayCardError = HolidayCardError(err: errDesc, stack: String(), style: HolidayCardError.Style.Informational)
+            
+            // Post the error for reporting.
+            let err:[String:HolidayCardError] = ["error":errData]
+            let nc:NotificationCenter = NotificationCenter.default
+            nc.post(name: Notification.Name.HCHolidayCardError, object: nil, userInfo: err)
+            
             return
         }
         
         // Ensure that the destination list does not already exist.
         guard (GetContactGroupContents(groupName: grpDest).count == 0) else
         {
-            print("GenerateHolidayList - Destination needs to be flushed.")
+            let errDesc:String = "GenerateHolidayList -Destination needs to be flushed."
+            let errData:HolidayCardError = HolidayCardError(err: errDesc, stack: String(), style: HolidayCardError.Style.Informational)
+            
+            // Post the error for reporting.
+            let err:[String:HolidayCardError] = ["error":errData]
+            let nc:NotificationCenter = NotificationCenter.default
+            nc.post(name: Notification.Name.HCHolidayCardError, object: nil, userInfo: err)
+
             return
         }
         
@@ -258,7 +306,13 @@ class HolidayCardProcessor : NSObject
             let containers:[CNContainer] = try contactStore.containers(matching: predContainer)
             guard (containers.count == 1) else
             {
-                print("GenerateHolidayList() - Wrong number of matching containers.")
+                let errDesc:String = "GenerateHolidayList - Wrong number of matching containers."
+                let errData:HolidayCardError = HolidayCardError(err: errDesc, stack: String(), style: HolidayCardError.Style.Informational)
+                
+                // Post the error for reporting.
+                let err:[String:HolidayCardError] = ["error":errData]
+                let nc:NotificationCenter = NotificationCenter.default
+                nc.post(name: Notification.Name.HCHolidayCardError, object: nil, userInfo: err)
                 return
             }
             
@@ -267,7 +321,17 @@ class HolidayCardProcessor : NSObject
         }
         catch
         {
-            print("GenerateHolidayList() - Error getting container.")
+            // Get the stack trace
+            var stackTrace:String = "Stack Trace:"
+            Thread.callStackSymbols.forEach{stackTrace = stackTrace + "\n" + $0}
+            
+            let errDesc:String = "Unable to get the specified source contact container."
+            let errData:HolidayCardError = HolidayCardError(err: errDesc, stack: stackTrace, style: HolidayCardError.Style.Critical)
+            
+            // Post the error for reporting.
+            let err:[String:HolidayCardError] = ["error":errData]
+            let nc:NotificationCenter = NotificationCenter.default
+            nc.post(name: Notification.Name.HCHolidayCardError, object: nil, userInfo: err)
         }
         
         // Construct a request to (1) create the new/modified contact and (2) add all of the items in the Holiday Destination group
@@ -285,10 +349,19 @@ class HolidayCardProcessor : NSObject
         do
         {
             try contactStore.execute(requestToCreate)
-            print("Success, You added the user(s)")
         } catch let error
         {
-            print("GenerateHolidayList() - Error = \(error)")
+            // Get the stack trace
+            var stackTrace:String = "Stack Trace:"
+            Thread.callStackSymbols.forEach{stackTrace = stackTrace + "\n" + $0}
+            
+            let errDesc:String = "Unable to generate mailing list. Err:" + error.localizedDescription
+            let errData:HolidayCardError = HolidayCardError(err: errDesc, stack: stackTrace, style: HolidayCardError.Style.Critical)
+            
+            // Post the error for reporting.
+            let err:[String:HolidayCardError] = ["error":errData]
+            let nc:NotificationCenter = NotificationCenter.default
+            nc.post(name: Notification.Name.HCHolidayCardError, object: nil, userInfo: err)
         }
     }
     
@@ -429,23 +502,27 @@ class HolidayCardProcessor : NSObject
 
     // MARK: -- Public properties
     //
-    // Description: Read-only property accessor to determine if permission to access the contacts database has been granted.
+    // @desc: Read-only property accessor to determine if permission to access the contacts database has been granted.
     //
-    // Arguments:   None
+    // @paeam:  None
     //
-    // Return:      Tuple -
+    // @eeturn: Tuple -
     //              permissionGranted:  true if permission to the contacts database has been authorized.
     //              alertable:          true if permission has not been authorized but simply requires the user to manually grant access.
     //
-    // Remarks:     None
+    // @remark: To reset the privacy permissions, use terminal to execute: tccutil reset AddressBook
+    // @remark: throws an permission exception if permissions are not yet determined.
     //
     var IsContactPermissionGranted: (permissionGranted: Bool, alertable: Bool)!
     {
         get
         {
-            let authStatus: CNAuthorizationStatus = CNContactStore.authorizationStatus(for: CNEntityType.contacts)
+            let authStatus: CNAuthorizationStatus = CNAuthorizationStatus.notDetermined//  CNContactStore.authorizationStatus(for: CNEntityType.contacts)
+            
+            let permissionAuthorized = (authStatus == CNAuthorizationStatus.authorized)
+            let permissionAlertable = !permissionAuthorized && (authStatus != CNAuthorizationStatus.denied)
 
-            return ((authStatus == CNAuthorizationStatus.authorized), (authStatus == CNAuthorizationStatus.denied))
+            return (permissionAuthorized, permissionAlertable)
         }
     }
     
@@ -475,9 +552,19 @@ class HolidayCardProcessor : NSObject
                     groupNames.append(group.name)
                 }
             }
-            catch let err
+            catch let error
             {
-                print("GetContactGroups: Error getting group list err-\(err)")
+                // Get the stack trace
+                var stackTrace:String = "Stack Trace:"
+                Thread.callStackSymbols.forEach{stackTrace = stackTrace + "\n" + $0}
+                
+                let errDesc:String = "Unable to get the contact containers. Err:" + error.localizedDescription
+                let errData:HolidayCardError = HolidayCardError(err: errDesc, stack: stackTrace, style: HolidayCardError.Style.Critical)
+                
+                // Post the error for reporting.
+                let err:[String:HolidayCardError] = ["error":errData]
+                let nc:NotificationCenter = NotificationCenter.default
+                nc.post(name: Notification.Name.HCHolidayCardError, object: nil, userInfo: err)
             }
             
             return groupNames
@@ -522,6 +609,18 @@ class HolidayCardProcessor : NSObject
         }
         catch
         {
+            // Get the stack trace
+            var stackTrace:String = "Stack Trace:"
+            Thread.callStackSymbols.forEach{stackTrace = stackTrace + "\n" + $0}
+            
+            let errDesc:String = "Unable to get specified contact container."
+            let errData:HolidayCardError = HolidayCardError(err: errDesc, stack: stackTrace, style: HolidayCardError.Style.Critical)
+            
+            // Post the error for reporting.
+            let err:[String:HolidayCardError] = ["error":errData]
+            let nc:NotificationCenter = NotificationCenter.default
+            nc.post(name: Notification.Name.HCHolidayCardError, object: nil, userInfo: err)
+            
             status = false
         }
         

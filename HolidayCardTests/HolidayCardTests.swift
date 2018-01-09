@@ -56,26 +56,4 @@ class HolidayCardTests: XCTestCase {
             // Put the code you want to measure the time of here.
         }
     }
-    
-    
-    // Private helper method to show an alert when permission to the contacts have not been granted.
-    private func showPermissionAlert() {
-        let appName: String = Bundle.main.infoDictionary![kCFBundleNameKey as String] as! String
-        let alertString: String = "Application '" + appName + "' requires access to the Contacts application."
-        /*
-         let alert = UIAlertController(title: "", message: "Allow App to access contacts"
-         , preferredStyle: .alert)
-         let cancelAction = UIAlertAction(title: "Cancel", style: .cancel, handler: nil)
-         let settingAction = UIAlertAction(title: "Settings", style: .default, handler: { (action) in
-         // Open Settings, right to the page with your app’s permissions
-         openSetings()
-         })
-         
-         alert.addAction(cancelAction)
-         alert.addAction(settingAction)
-         alert.preferredAction = settingAction
-         self.present(alert, animated: true, completion: nil)\
-         */
-        print(alertString)
-    }
 }
