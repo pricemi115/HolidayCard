@@ -21,8 +21,38 @@ import Contacts
 //
 class HolidayCardProcessor : NSObject
 {
-    // MARK: Constants and enumerations for the class.
-    // MARK: end Constants and enumerations
+    // MARK: Constants, Enumerations, & Structures for the class.
+    //
+    // @desc: Constant to serve as the identifier for the ** All Contacts ** source
+    //
+    fileprivate let ALL_CONTACTS_SOURCE_ID:String = "**ALL_CONTACTS**"
+    //
+    // @desc: Constant to serve as the name for the ** All Contacts ** source
+    //
+    fileprivate let ALL_CONTACTS_NAME:String = "All Contacts"   // TODO: Support localization
+
+    //
+    // @desc: Enumeration specifying the type of contact source.
+    //
+    enum ContactSourceType:Int
+    {
+        case Invalid     = -1
+        case AllContacts = 0
+        case Container   = 1
+        case Group       = 2
+    }
+    
+    //
+    // @desc: Structure specifying the data representing a contact source.
+    //
+    struct ContactSource
+    {
+        var name:String             = String()
+        var identifier:String       = String()
+        var type:ContactSourceType  = ContactSourceType.Invalid
+    }
+    
+    // MARK: end Constants, Enumerations, & Structures
     
     // MARK: Data members
     // MARK: end Data members
@@ -73,32 +103,150 @@ class HolidayCardProcessor : NSObject
     }
     
     //
+    // @desc:   Helper to determine if the source identifier represents a Container or a Group
+    //
+    // @param:  sourceId:    Identifier to be checked/validated.
+    //
+    // @return: Contact Type
+    //
+    // @remarks:None
+    //
+    func GetContactSourceType(sourceId:String) -> ContactSourceType
+    {
+        var sourceType:ContactSourceType = ContactSourceType.Invalid
+     
+        // Is the source id, the special ** All Contacts** one?
+        if (sourceId.compare(ALL_CONTACTS_SOURCE_ID) == .orderedSame)
+        {
+            sourceType = ContactSourceType.AllContacts
+        }
+        else
+        {
+            // Determine if this source id is for a single container or group.
+            let sources:[String] = [sourceId]
+            do
+            {
+                // Determine the source and create an appropriate predicate for getting the desired contacts.
+                let contactStore = CNContactStore()
+                let matchingContainers:[CNContainer]    = try contactStore.containers(matching: CNContainer.predicateForContainers(withIdentifiers: sources))
+                let matchingGroups:[CNGroup]            = try contactStore.groups(matching: CNGroup.predicateForGroups(withIdentifiers: sources))
+                if (!matchingContainers.isEmpty)
+                {
+                    // Source Id is for a container.
+                    sourceType = ContactSourceType.Container
+                }
+                else if (!matchingGroups.isEmpty)
+                {
+                    // Source Id is for a group.
+                    sourceType = ContactSourceType.Group
+                }
+            }
+            catch
+            {
+                // Get the stack trace
+                var stackTrace:String = "Stack Trace:"
+                Thread.callStackSymbols.forEach{stackTrace = stackTrace + "\n" + $0}
+                
+                let errDesc:String = "Unable to determine contact source."
+                let errData:HolidayCardError = HolidayCardError(err: errDesc, stack: stackTrace, style: HolidayCardError.Style.Critical)
+                
+                // Post the error for reporting.
+                let err:[String:HolidayCardError] = ["error":errData]
+                let nc:NotificationCenter = NotificationCenter.default
+                nc.post(name: Notification.Name.HCHolidayCardError, object: nil, userInfo: err)
+            }
+        }
+        
+        return sourceType
+    }
+    
+    //
     // @desc:   Retrieves a list of contacts for the group specified.
     //
-    // @param:  groupName - Name of the group to get the contacts
+    // @param:  sourceId - Identifier of the desired source for the contacts. Possibilities are a group or container.
     //
     // @return: List of contacts
     //
     // @remarks:None
     //
-    func GetContactGroupContents(groupName: String) -> [CNContact]
+    func GetContactsFromSource(sourceId: String) -> [CNContact]
     {
         var contactList:[CNContact] = [CNContact]()
         
-        // Get the information for the group specified.
-        let (groupFound, groupId):(Bool, String) = GetGroupInfo(groupName: groupName)
+        var contactPredicates:[NSPredicate] = [NSPredicate]()
+        // Determine the appropriate predicate for getting the reqursted contacts?
+        let sourceType:ContactSourceType = GetContactSourceType(sourceId: sourceId)
         
-        // Check for a valid contact group
-        if (groupFound &&
-            !groupId.isEmpty)
+        switch sourceType
         {
+        case ContactSourceType.Container:
+            // Source Id is for a singla container.
+            let pred:NSPredicate = CNContact.predicateForContactsInContainer(withIdentifier: sourceId)
+            contactPredicates.append(pred)
+            break
+            
+        case ContactSourceType.Group:
+            // Source Id is for a single group.
+            let pred:NSPredicate = CNContact.predicateForContactsInGroup(withIdentifier: sourceId)
+            contactPredicates.append(pred)
+            break
+        
+        case ContactSourceType.AllContacts:
+            // Source Id is for ALL Containers.
+            let contactStore = CNContactStore()
+            do
+            {
+                // Get a list of all of the containers.
+                let containerList:[CNContainer] = try contactStore.containers(matching: nil)
+                
+                // Build a list of predicates for each container.
+                for container:CNContainer in containerList
+                {
+                    let pred:NSPredicate = CNContact.predicateForContactsInContainer(withIdentifier: container.identifier)
+                    contactPredicates.append(pred)
+                }
+            }
+            catch let error
+            {
+                // Get the stack trace
+                var stackTrace:String = "Stack Trace:"
+                Thread.callStackSymbols.forEach{stackTrace = stackTrace + "\n" + $0}
+                
+                let errDesc:String = "Unable to get the contact containers. Err:" + error.localizedDescription
+                let errData:HolidayCardError = HolidayCardError(err: errDesc, stack: stackTrace, style: HolidayCardError.Style.Critical)
+                
+                // Post the error for reporting.
+                let err:[String:HolidayCardError] = ["error":errData]
+                let nc:NotificationCenter = NotificationCenter.default
+                nc.post(name: Notification.Name.HCHolidayCardError, object: nil, userInfo: err)
+            }
+            break
+            
+        default:
+            // Nothing to do.
+            break
+        }
+        
+        // Check for a valid contact predicate list
+        if (contactPredicates.count > 0)
+        {
+            // Spefigy the keys that need to be acquired.
             let keys = [CNContactRelationsKey, CNContactPostalAddressesKey]
-            let contactPredicate:NSPredicate = CNContact.predicateForContactsInGroup(withIdentifier: groupId)
             
             do
             {
                 let contactStore = CNContactStore()
-                contactList = try contactStore.unifiedContacts(matching: contactPredicate, keysToFetch: keys as [CNKeyDescriptor])
+                for predicate:NSPredicate in contactPredicates
+                {
+                    // Get the contacts for this predicate
+                    let list:[CNContact] = try contactStore.unifiedContacts(matching: predicate, keysToFetch: keys as [CNKeyDescriptor])
+                    
+                    // Append the list to the super-list.
+                    if (list.count > 0)
+                    {
+                        contactList.append(contentsOf: list)
+                    }
+                }
             }
             catch
             {
@@ -122,43 +270,62 @@ class HolidayCardProcessor : NSObject
     //
     // @desc:   Clear the "destination" contact group
     //
-    // @param:  groupName - Name of the group to be flushed.
+    // @param:  sourceId - Identifier of the group to be flushed.
     //
     // @return: None
     //
     // @remarks:Assumes that the destination group is only used to store the "modified"
     // @remarks:contacts for the purpose of printing address labels.
     //
-    func FlushAllGroupContacts(groupName: String) -> Void
+    func FlushAllGroupContacts(sourceId: String) -> Void
     {
-        let contactsToDelete:[CNContact] = GetContactGroupContents(groupName: groupName)
-        
-        guard (contactsToDelete.count > 0) else
+        let sourceType:ContactSourceType = GetContactSourceType(sourceId: sourceId)
+        if (ContactSourceType.Group == sourceType)
         {
-            // Nothing to do.
-            return
+            let contactsToDelete:[CNContact] = GetContactsFromSource(sourceId: sourceId)
+            
+            guard (contactsToDelete.count > 0) else
+            {
+                // Nothing to do.
+                return
+            }
+            
+            // Construct a request to delete all of the items in the
+            let requestToDelete = CNSaveRequest()
+            for contact:CNContact in contactsToDelete
+            {
+                // Request to delete.
+                requestToDelete.delete(contact.mutableCopy() as! CNMutableContact)
+            }
+            
+            // Perform the deletion.
+            do
+            {
+                let contactStore = CNContactStore()
+                try contactStore.execute(requestToDelete)
+            } catch let error
+            {
+                // Get the stack trace
+                var stackTrace:String = "Stack Trace:"
+                Thread.callStackSymbols.forEach{stackTrace = stackTrace + "\n" + $0}
+                
+                let errDesc:String = "Unable to flush contacts. Err:" + error.localizedDescription
+                let errData:HolidayCardError = HolidayCardError(err: errDesc, stack: stackTrace, style: HolidayCardError.Style.Critical)
+                
+                // Post the error for reporting.
+                let err:[String:HolidayCardError] = ["error":errData]
+                let nc:NotificationCenter = NotificationCenter.default
+                nc.post(name: Notification.Name.HCHolidayCardError, object: nil, userInfo: err)
+            }
         }
-        
-        // Construct a request to delete all of the items in the
-        let requestToDelete = CNSaveRequest()
-        for contact:CNContact in contactsToDelete
+        else if (ContactSourceType.Invalid != sourceType)
         {
-            // Request to delete.
-            requestToDelete.delete(contact.mutableCopy() as! CNMutableContact)
-        }
-        
-        // Perform the deletion.
-        do
-        {
-            let contactStore = CNContactStore()
-            try contactStore.execute(requestToDelete)
-        } catch let error
-        {
+            // Inappropriate source id was passed in.
             // Get the stack trace
             var stackTrace:String = "Stack Trace:"
             Thread.callStackSymbols.forEach{stackTrace = stackTrace + "\n" + $0}
             
-            let errDesc:String = "Unable to flush contacts. Err:" + error.localizedDescription
+            let errDesc:String = "FlushContacts() does not accept selections other than Groups."
             let errData:HolidayCardError = HolidayCardError(err: errDesc, stack: stackTrace, style: HolidayCardError.Style.Critical)
             
             // Post the error for reporting.
@@ -243,20 +410,35 @@ class HolidayCardProcessor : NSObject
     //
     // @desc:   Generate a list of contacts for printing holiday card addresses
     //
-    // @param:  grpSource - Name of the group providing the source data for the holiday mailing list.
-    // @param:  grpDest   - Name of the group for the destination of the holiday mailing list.
+    // @param:  sourceId          - Identifier of the source providing contact data for the holiday mailing list.
+    // @param:  addrSource        - Label for the postal address to use for generating the mailing list.
+    // @param:  relatedNameSource - Label for the related name to use for generating the mailing list.
+    // @param:  destinationId     - Identifier of the destination of the holiday mailing list. ** MUST be a Group!!
     //
     // @return: None
     //
     // @remarks:None
     //
-    func GenerateHolidayList(grpSource: String, addrSource: String, relatedNameSource: String, grpDest: String) -> Void
+    func GenerateHolidayList(sourceId: String, addrSource: String, relatedNameSource: String, destinationId: String) -> Void
     {
         let contactStore = CNContactStore()
-        let grpHolidayGroup: CNGroup = GetGroup(groupName: grpDest).group
+        
+        // Ensure that the destination refers to a group
+        guard (GetContactSourceType(sourceId: destinationId) == ContactSourceType.Group) else
+        {
+            let errDesc:String = "GenerateHolidayList - Destination must refer to a group."
+            let errData:HolidayCardError = HolidayCardError(err: errDesc, stack: String(), style: HolidayCardError.Style.Informational)
+            
+            // Post the error for reporting.
+            let err:[String:HolidayCardError] = ["error":errData]
+            let nc:NotificationCenter = NotificationCenter.default
+            nc.post(name: Notification.Name.HCHolidayCardError, object: nil, userInfo: err)
+            
+            return
+        }
         
         // Ensure that the source and destination are indeed different.
-        guard (grpSource.caseInsensitiveCompare(grpDest) != .orderedSame) else
+        guard (sourceId.caseInsensitiveCompare(destinationId) != .orderedSame) else
         {
             let errDesc:String = "GenerateHolidayList - Source & Destination are the same."
             let errData:HolidayCardError = HolidayCardError(err: errDesc, stack: String(), style: HolidayCardError.Style.Informational)
@@ -269,8 +451,22 @@ class HolidayCardProcessor : NSObject
             return
         }
         
+        // Ensure that the destination list does not already exist.
+        guard (GetContactsFromSource(sourceId: destinationId).count == 0) else
+        {
+            let errDesc:String = "GenerateHolidayList -Destination needs to be flushed."
+            let errData:HolidayCardError = HolidayCardError(err: errDesc, stack: String(), style: HolidayCardError.Style.Informational)
+            
+            // Post the error for reporting.
+            let err:[String:HolidayCardError] = ["error":errData]
+            let nc:NotificationCenter = NotificationCenter.default
+            nc.post(name: Notification.Name.HCHolidayCardError, object: nil, userInfo: err)
+            
+            return
+        }
+        
         // Ensure that there are contacts to put into the list.
-        let holidayList:[CNContact] = GetHolidayList(groupSource: grpSource, addrSource: addrSource, relatedNameSource: relatedNameSource, valid: true)
+        let holidayList:[CNContact] = GetHolidayList(sourceId: sourceId, addrSource: addrSource, relatedNameSource: relatedNameSource, valid: true)
         guard (holidayList.count > 0) else
         {
             let errDesc:String = "GenerateHolidayList - No contacts to build a list from."
@@ -284,25 +480,11 @@ class HolidayCardProcessor : NSObject
             return
         }
         
-        // Ensure that the destination list does not already exist.
-        guard (GetContactGroupContents(groupName: grpDest).count == 0) else
-        {
-            let errDesc:String = "GenerateHolidayList -Destination needs to be flushed."
-            let errData:HolidayCardError = HolidayCardError(err: errDesc, stack: String(), style: HolidayCardError.Style.Informational)
-            
-            // Post the error for reporting.
-            let err:[String:HolidayCardError] = ["error":errData]
-            let nc:NotificationCenter = NotificationCenter.default
-            nc.post(name: Notification.Name.HCHolidayCardError, object: nil, userInfo: err)
-
-            return
-        }
-        
-        // Get the id og the container housing the "destination" group.
+        // Get the id of the container housing the "destination" group.
         var holidayContainerId:String = String()
         do
         {
-            let predContainer:NSPredicate = CNContainer.predicateForContainerOfGroup(withIdentifier: grpHolidayGroup.identifier)
+            let predContainer:NSPredicate = CNContainer.predicateForContainerOfGroup(withIdentifier: destinationId)
             let containers:[CNContainer] = try contactStore.containers(matching: predContainer)
             guard (containers.count == 1) else
             {
@@ -334,6 +516,44 @@ class HolidayCardProcessor : NSObject
             nc.post(name: Notification.Name.HCHolidayCardError, object: nil, userInfo: err)
         }
         
+        // Get the group for the destination id.
+        // Get the id of the container housing the "destination" group.
+        var grpHolidayGroup:CNGroup? = nil
+        do
+        {
+            let matchingGroups:[String] = [destinationId]
+            let predGroup:NSPredicate = CNGroup.predicateForGroups(withIdentifiers: matchingGroups)
+            let groups:[CNGroup] = try contactStore.groups(matching: predGroup)
+            guard (groups.count == 1) else
+            {
+                let errDesc:String = "GenerateHolidayList - Wrong number of matching destination groups."
+                let errData:HolidayCardError = HolidayCardError(err: errDesc, stack: String(), style: HolidayCardError.Style.Informational)
+                
+                // Post the error for reporting.
+                let err:[String:HolidayCardError] = ["error":errData]
+                let nc:NotificationCenter = NotificationCenter.default
+                nc.post(name: Notification.Name.HCHolidayCardError, object: nil, userInfo: err)
+                return
+            }
+            
+            // Get the identifier
+            grpHolidayGroup = groups[0]
+        }
+        catch
+        {
+            // Get the stack trace
+            var stackTrace:String = "Stack Trace:"
+            Thread.callStackSymbols.forEach{stackTrace = stackTrace + "\n" + $0}
+            
+            let errDesc:String = "Unable to get the specified source contact container."
+            let errData:HolidayCardError = HolidayCardError(err: errDesc, stack: stackTrace, style: HolidayCardError.Style.Critical)
+            
+            // Post the error for reporting.
+            let err:[String:HolidayCardError] = ["error":errData]
+            let nc:NotificationCenter = NotificationCenter.default
+            nc.post(name: Notification.Name.HCHolidayCardError, object: nil, userInfo: err)
+        }
+        
         // Construct a request to (1) create the new/modified contact and (2) add all of the items in the Holiday Destination group
         let requestToCreate = CNSaveRequest()
         for contact:CNContact in holidayList
@@ -342,7 +562,7 @@ class HolidayCardProcessor : NSObject
             let mutableContact:CNMutableContact = contact.mutableCopy() as! CNMutableContact
             requestToCreate.add(mutableContact, toContainerWithIdentifier: holidayContainerId)
             // Add the contact to the holiday destination group.
-            requestToCreate.addMember(contact, to: grpHolidayGroup)
+            requestToCreate.addMember(contact, to: grpHolidayGroup!)
         }
         
         // Perform the Update.
@@ -368,7 +588,7 @@ class HolidayCardProcessor : NSObject
     //
     // @desc: Generates a list of immutable Holiday Contacts
     //
-    // @param: groupSource       - Name of the group acting as the source for the holiday mailing list.
+    // @param: sourceId          - Identifier of the source providing contact data for the holiday mailing list.
     // @param: addrSource        - Label for the postal address to use for generating the mailing list.
     // @param: relatedNameSource - Label for the related name to use for generating the mailing list.
     // @param: valid             - Flag to indicate if the list is for valid contacts or contacts with errors.
@@ -377,12 +597,12 @@ class HolidayCardProcessor : NSObject
     //
     // Remarks:     None
     //
-    private func GetHolidayList(groupSource: String, addrSource: String, relatedNameSource: String, valid: Bool) -> [CNContact]!
+    private func GetHolidayList(sourceId: String, addrSource: String, relatedNameSource: String, valid: Bool) -> [CNContact]!
     {
         var holidayList:[CNMutableContact] = [CNMutableContact]()
         
         // Get the requested source list for the holiday contacts
-        let holidayContacts:[CNContact] = GetContactGroupContents(groupName: groupSource)
+        let holidayContacts:[CNContact] = GetContactsFromSource(sourceId: sourceId)
         
         // Iterate through the list of holiday contacts and create a modified
         // list suitable for label printing.
@@ -433,28 +653,20 @@ class HolidayCardProcessor : NSObject
     }
     
     //
-    // @desc:   Accessor for group information.
+    // @desc:   Gets a list of postal addresses found in the contacts specifed by the source.
     //
-    // @param:  groupName - Name of the group
+    // @param:  sourceId: Identifier of the source of contacts.
     //
-    // @return: valid - Flag indicating group exists.
-    //          groupId - String identifier of the group.
+    // @return: List of postal address labels.
     //
     // @remarks:None
     //
-    func GetGroupInfo(groupName:String) -> (valid: Bool, groupId: String)
-    {
-        let (valid, group):(Bool, CNGroup) = GetGroup(groupName: groupName);
-        
-        return (valid, group.identifier)
-    }
-    
-    func GetPostalAddressLabels(groupName:String) -> [String]
+    func GetPostalAddressLabels(sourceId:String) -> [String]
     {
         var labels:[String] = [String]()
         
         // Get the contents of the specified group.
-        let contacts:[CNContact] = GetContactGroupContents(groupName: groupName)
+        let contacts:[CNContact] = GetContactsFromSource(sourceId: sourceId)
         for contact:CNContact in contacts
         {
             // get all of the postal addresses in the contact.
@@ -474,12 +686,21 @@ class HolidayCardProcessor : NSObject
         return labels
     }
     
-    func GetRelatedNamesLabels(groupName:String) -> [String]
+    //
+    // @desc:   Gets a list of related names found in the contacts specifed by the source.
+    //
+    // @param:  sourceId: Identifier of the source of contacts.
+    //
+    // @return: List of related name labels.
+    //
+    // @remarks:None
+    //
+    func GetRelatedNamesLabels(sourceId:String) -> [String]
     {
         var labels:[String] = [String]()
         
         // Get the contents of the specified group.
-        let contacts:[CNContact] = GetContactGroupContents(groupName: groupName)
+        let contacts:[CNContact] = GetContactsFromSource(sourceId: sourceId)
         for contact:CNContact in contacts
         {
             // get all of the postal addresses in the contact.
@@ -527,29 +748,44 @@ class HolidayCardProcessor : NSObject
     }
     
     //
-    // @desc:   Read-Only property providing a list of names for the contact groups.
+    // @desc:   Read-Only property providing a list of contact containers in the database
     //
     // @param:  None
     //
-    // @return: List of group names.
+    // @return: List of contact sources
     //
-    // @remarks:None
+    // @remarks:The list is a hierarchial listing of containers & groups. i.e. all groups are owned in the container above them.
     //
-    var GetContactGroups: [String]!
+    var GetContactSources: [ContactSource]!
     {
         get
         {
-            var groupNames:[String] = [String]()
+            var containers:[ContactSource] = [ContactSource]()
             let contactStore = CNContactStore()
-
+            
+            // Always append ** All Contacts ** as the very first item.
+            // Even when there are no contacts this is a valid selection.
+            let allContacts:ContactSource = ContactSource(name: ALL_CONTACTS_NAME, identifier: ALL_CONTACTS_SOURCE_ID, type: ContactSourceType.AllContacts)
+            containers.append(allContacts)
+            
             do
             {
-                let groupList:[CNGroup] = try contactStore.groups(matching: nil)
+                let containerList:[CNContainer] = try contactStore.containers(matching: nil)
                 
-                // Build a list of the group names.
-                for group:CNGroup in groupList
+                for container:CNContainer in containerList
                 {
-                    groupNames.append(group.name)
+                    // Append the container to the list
+                    let itemContainer:ContactSource = ContactSource(name: container.name, identifier: container.identifier, type: ContactSourceType.Container)
+                    containers.append(itemContainer)
+                    
+                    // Get any groups contained within this container.
+                    let groupList:[CNGroup] = try contactStore.groups(matching: CNGroup.predicateForGroupsInContainer(withIdentifier: container.identifier))
+                    // Append the groups to the list.
+                    for group:CNGroup in groupList
+                    {
+                        let itemGroup:ContactSource = ContactSource(name: group.name, identifier: group.identifier, type: ContactSourceType.Group)
+                        containers.append(itemGroup)
+                    }
                 }
             }
             catch let error
@@ -566,65 +802,14 @@ class HolidayCardProcessor : NSObject
                 let nc:NotificationCenter = NotificationCenter.default
                 nc.post(name: Notification.Name.HCHolidayCardError, object: nil, userInfo: err)
             }
+
             
-            return groupNames
+            return containers
         }
     }
     
     // MARK: -- end Public properties
 
     // MARK: Private methods & properties
-    //
-    // @desc:   Finds the CNGroup based on the name provided.
-    //
-    // @param:  groupName - Name of the group being sought
-    //
-    // @return: (Tuple) status - true if matching group found.
-    //                  group  - CNGroup being sought.
-    //
-    // @remarks: None
-    //
-    fileprivate func GetGroup(groupName:String) -> (status: Bool, group: CNGroup)
-    {
-        var status = false
-        var grpSearch:CNGroup = CNGroup()
-        let contactStore = CNContactStore()
-        
-        // Get all of the known groups.
-        do
-        {
-            let groupList:[CNGroup] = try contactStore.groups(matching: nil)
-        
-            // Find the group that matches the Holiday Card source.
-            for group:CNGroup in groupList
-            {
-                if (group.name == groupName)
-                {
-                    // Match found
-                    grpSearch = group
-                    status = true
-                    break
-                }
-            }
-        }
-        catch
-        {
-            // Get the stack trace
-            var stackTrace:String = "Stack Trace:"
-            Thread.callStackSymbols.forEach{stackTrace = stackTrace + "\n" + $0}
-            
-            let errDesc:String = "Unable to get specified contact container."
-            let errData:HolidayCardError = HolidayCardError(err: errDesc, stack: stackTrace, style: HolidayCardError.Style.Critical)
-            
-            // Post the error for reporting.
-            let err:[String:HolidayCardError] = ["error":errData]
-            let nc:NotificationCenter = NotificationCenter.default
-            nc.post(name: Notification.Name.HCHolidayCardError, object: nil, userInfo: err)
-            
-            status = false
-        }
-        
-        return (status, grpSearch)
-    }
     // MARK: end Private methods & properties
 }
