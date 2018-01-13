@@ -473,15 +473,16 @@
                 <windowController id="B8D-0N-5wS" sceneMemberID="viewController">
                     <window key="window" title="Holiday Card" allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" oneShot="NO" releasedWhenClosed="NO" showsToolbarButton="NO" visibleAtLaunch="NO" animationBehavior="default" id="IQv-IB-iLA">
                         <windowStyleMask key="styleMask" titled="YES" miniaturizable="YES" resizable="YES"/>
-                        <windowPositionMask key="initialPositionMask" leftStrut="YES" rightStrut="YES" topStrut="YES" bottomStrut="YES"/>
-                        <rect key="contentRect" x="196" y="240" width="480" height="270"/>
+                        <rect key="contentRect" x="196" y="240" width="480" height="300"/>
                         <rect key="screenRect" x="0.0" y="0.0" width="1680" height="1027"/>
+                        <value key="minSize" type="size" width="480" height="300"/>
+                        <value key="maxSize" type="size" width="480" height="300"/>
                         <connections>
                             <outlet property="delegate" destination="B8D-0N-5wS" id="98r-iN-zZc"/>
                         </connections>
                     </window>
                     <connections>
-                        <segue destination="XfG-lQ-9wD" kind="relationship" relationship="window.shadowedContentViewController" id="cq2-FE-JQM"/>
+                        <segue destination="eaJ-ws-dD4" kind="relationship" relationship="window.shadowedContentViewController" id="8yB-bZ-4v2"/>
                     </connections>
                 </windowController>
                 <customObject id="Oky-zY-oP4" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
@@ -699,6 +700,134 @@
                 <customObject id="rPt-NT-nkU" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="75" y="655"/>
+        </scene>
+        <!--MasterSplitViewController-->
+        <scene sceneID="YEq-DQ-Da6">
+            <objects>
+                <splitViewController title="MasterSplitViewController" id="eaJ-ws-dD4" sceneMemberID="viewController">
+                    <splitViewItems>
+                        <splitViewItem id="RH6-3A-kum"/>
+                        <splitViewItem id="b7L-4e-YgE"/>
+                    </splitViewItems>
+                    <splitView key="splitView" dividerStyle="thin" vertical="YES" id="eof-eQ-3a9">
+                        <rect key="frame" x="0.0" y="0.0" width="450" height="300"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                        <connections>
+                            <outlet property="delegate" destination="eaJ-ws-dD4" id="yBZ-og-wQH"/>
+                        </connections>
+                    </splitView>
+                    <connections>
+                        <outlet property="splitView" destination="eof-eQ-3a9" id="dgT-bb-g6q"/>
+                        <segue destination="Qa3-JF-AYJ" kind="relationship" relationship="splitItems" id="nbk-ae-15n"/>
+                        <segue destination="bD2-fc-fam" kind="relationship" relationship="splitItems" id="OB9-mP-0EU"/>
+                    </connections>
+                </splitViewController>
+                <customObject id="YkM-t5-SeN" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="579" y="655"/>
+        </scene>
+        <!--SideBar-->
+        <scene sceneID="SSC-g7-Mlv">
+            <objects>
+                <viewController title="SideBar" id="Qa3-JF-AYJ" customClass="SideBarViewController" customModule="HolidayCard" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" id="lgR-xc-0iV">
+                        <rect key="frame" x="0.0" y="0.0" width="120" height="300"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="kDc-dQ-Abg">
+                                <rect key="frame" x="-2" y="277" width="125" height="24"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMinY="YES"/>
+                                <buttonCell key="cell" type="smallSquare" title="Source" bezelStyle="smallSquare" alignment="left" lineBreakMode="truncatingTail" state="on" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="c49-bV-nJM">
+                                    <behavior key="behavior" lightByBackground="YES" lightByGray="YES" changeBackground="YES" changeGray="YES"/>
+                                    <font key="font" metaFont="system"/>
+                                    <string key="keyEquivalent">s</string>
+                                    <modifierMask key="keyEquivalentModifierMask" command="YES"/>
+                                </buttonCell>
+                                <accessibility description="Mailing list source" identifier="btnSource"/>
+                                <connections>
+                                    <action selector="actionEventHandler:" target="Qa3-JF-AYJ" id="ziW-aD-ndb"/>
+                                </connections>
+                            </button>
+                            <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="4Qe-MH-7Th">
+                                <rect key="frame" x="-2" y="257" width="125" height="24"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMinY="YES"/>
+                                <buttonCell key="cell" type="smallSquare" title="Destination" bezelStyle="smallSquare" alignment="left" lineBreakMode="truncatingTail" state="on" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="fsU-Pm-Wlp">
+                                    <behavior key="behavior" lightByBackground="YES" lightByGray="YES" changeBackground="YES" changeGray="YES"/>
+                                    <font key="font" metaFont="system"/>
+                                    <string key="keyEquivalent">d</string>
+                                    <modifierMask key="keyEquivalentModifierMask" command="YES"/>
+                                </buttonCell>
+                                <accessibility description="Mailing list destination" identifier="btnDestination"/>
+                                <connections>
+                                    <action selector="actionEventHandler:" target="Qa3-JF-AYJ" id="TbZ-qI-JDV"/>
+                                </connections>
+                            </button>
+                        </subviews>
+                        <accessibility description="Side bar" identifier="vcSideBar"/>
+                    </view>
+                    <connections>
+                        <outlet property="_btnDestinationContent" destination="4Qe-MH-7Th" id="Iqe-vy-yDE"/>
+                        <outlet property="_btnSourceContent" destination="c49-bV-nJM" id="kLt-9T-RHT"/>
+                    </connections>
+                </viewController>
+                <customObject id="I3C-ez-0rl" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="1084" y="476"/>
+        </scene>
+        <!--DataContent-->
+        <scene sceneID="DdQ-RF-cjR">
+            <objects>
+                <viewController title="DataContent" id="bD2-fc-fam" customClass="DataContertViewController" customModule="HolidayCard" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" id="cHV-fe-lom">
+                        <rect key="frame" x="0.0" y="0.0" width="360" height="300"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <progressIndicator wantsLayer="YES" horizontalHuggingPriority="750" verticalHuggingPriority="750" fixedFrame="YES" maxValue="100" displayedWhenStopped="NO" bezeled="NO" indeterminate="YES" style="spinning" translatesAutoresizingMaskIntoConstraints="NO" id="uBC-1s-M5H">
+                                <rect key="frame" x="164" y="134" width="32" height="32"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                            </progressIndicator>
+                            <customView fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="4YB-gP-wtD">
+                                <rect key="frame" x="0.0" y="0.0" width="360" height="300"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                <subviews>
+                                    <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Yzp-A2-9Wa">
+                                        <rect key="frame" x="18" y="263" width="324" height="17"/>
+                                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                        <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Source Content" id="Qik-OV-537">
+                                            <font key="font" metaFont="system"/>
+                                            <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                                            <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                                        </textFieldCell>
+                                    </textField>
+                                </subviews>
+                            </customView>
+                            <customView fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="bIu-St-3Mu">
+                                <rect key="frame" x="0.0" y="0.0" width="360" height="300"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                <subviews>
+                                    <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="jjq-vP-MS8">
+                                        <rect key="frame" x="18" y="263" width="324" height="17"/>
+                                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                        <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Destination Content" id="Bjh-KZ-InG">
+                                            <font key="font" metaFont="system"/>
+                                            <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                                            <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                                        </textFieldCell>
+                                    </textField>
+                                </subviews>
+                            </customView>
+                        </subviews>
+                        <accessibility description="Data content"/>
+                    </view>
+                    <connections>
+                        <outlet property="_prgBusyIndicator" destination="uBC-1s-M5H" id="yz5-J7-sRJ"/>
+                        <outlet property="_viewDestinationContent" destination="bIu-St-3Mu" id="ndR-kQ-sRf"/>
+                        <outlet property="_viewSourceContent" destination="4YB-gP-wtD" id="36A-RQ-8JP"/>
+                    </connections>
+                </viewController>
+                <customObject id="xKp-N9-Syb" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="1204" y="845"/>
         </scene>
     </scenes>
 </document>

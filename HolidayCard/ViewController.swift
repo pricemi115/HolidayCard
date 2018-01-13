@@ -25,13 +25,16 @@ class ViewController: NSViewController {
     // MARK: end Properties
     
     // MARK: Data Members
+    //
     // @desc: reference to the holiday card processor.
+    //
     fileprivate var _hcp:HolidayCardProcessor!
-    // @desc: Dictionary of menu items
+    //
+    // @desc: Dictionary of menu items. Used to map source & destination menu selections to the corresponding ContactSource
+    //
     fileprivate var _mapMenuItems:Dictionary<uint, HolidayCardProcessor.ContactSource>!
-    
-    
     // MARK: end Data Members
+    
     //
     // @desc:   Initializer for the User Interface view
     //

@@ -51,7 +51,6 @@ class HolidayCardProcessor : NSObject
         var identifier:String       = String()
         var type:ContactSourceType  = ContactSourceType.Invalid
     }
-    
     // MARK: end Constants, Enumerations, & Structures
     
     // MARK: Data members
