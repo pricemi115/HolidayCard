@@ -17,6 +17,6 @@ extension Notification.Name
 {
     static let CNPermissionGranted      = Notification.Name("CNPermissionGranted")
     static let HCHolidayCardError       = Notification.Name("HCHolidayCardError")
-    static let HCEnableGenerateListBtn  = Notification.Name("HCEnableGenerateListBtn")
+    static let HCEnableUserInterface    = Notification.Name("HCEnableUserInterface")
     static let HCModeChange             = Notification.Name("HCModeChange")
 }

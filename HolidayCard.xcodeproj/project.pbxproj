@@ -10,7 +10,6 @@
 		5660042A2001ADC5005B4781 /* NotificationExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 566004292001ADC5005B4781 /* NotificationExtensions.swift */; };
 		5660042C2001C231005B4781 /* HolidayCardErrors.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5660042B2001C231005B4781 /* HolidayCardErrors.swift */; };
 		566121831FEDE91300CB66D3 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 566121821FEDE91300CB66D3 /* AppDelegate.swift */; };
-		566121851FEDE91300CB66D3 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 566121841FEDE91300CB66D3 /* ViewController.swift */; };
 		566121871FEDE91300CB66D3 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 566121861FEDE91300CB66D3 /* Assets.xcassets */; };
 		5661218A1FEDE91300CB66D3 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 566121881FEDE91300CB66D3 /* Main.storyboard */; };
 		566121961FEDE91300CB66D3 /* HolidayCardTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 566121951FEDE91300CB66D3 /* HolidayCardTests.swift */; };
@@ -43,7 +42,6 @@
 		5660042B2001C231005B4781 /* HolidayCardErrors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HolidayCardErrors.swift; sourceTree = "<group>"; };
 		5661217F1FEDE91300CB66D3 /* HolidayCard.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = HolidayCard.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		566121821FEDE91300CB66D3 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
-		566121841FEDE91300CB66D3 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
 		566121861FEDE91300CB66D3 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		566121891FEDE91300CB66D3 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		5661218B1FEDE91300CB66D3 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -112,7 +110,6 @@
 			isa = PBXGroup;
 			children = (
 				566121821FEDE91300CB66D3 /* AppDelegate.swift */,
-				566121841FEDE91300CB66D3 /* ViewController.swift */,
 				566121861FEDE91300CB66D3 /* Assets.xcassets */,
 				566121881FEDE91300CB66D3 /* Main.storyboard */,
 				5661218B1FEDE91300CB66D3 /* Info.plist */,
@@ -300,7 +297,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				566121851FEDE91300CB66D3 /* ViewController.swift in Sources */,
 				56ED628F200BE9D400659FAF /* DataContertViewController.swift in Sources */,
 				56ED628D200BE9AD00659FAF /* SideBarViewController.swift in Sources */,
 				566121831FEDE91300CB66D3 /* AppDelegate.swift in Sources */,
