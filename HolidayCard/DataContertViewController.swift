@@ -15,6 +15,16 @@ import Contacts
 class DataContertViewController: NSViewController
 {
     // MARK: Constants, Enumerations, & Structures.
+    //
+    // @desc: Structure for storing the currently selected menu items.
+    //
+    fileprivate struct SelectedItems
+    {
+        var source:uint         = 0
+        var destination:uint    = 0
+        var postal:uint         = 0
+        var relation:uint       = 0
+    }
     // MARK: end Constants, Enumerations, & Structures
     
     // MARK: Properties
@@ -39,6 +49,13 @@ class DataContertViewController: NSViewController
     // @desc: Dictionary of menu items. Used to map source & destination menu selections to the corresponding ContactSource
     //
     fileprivate var _mapMenuItems:Dictionary<uint, HolidayCardProcessor.ContactSource>!
+    //
+    // @desc: Cache of selected items
+    //
+    fileprivate var _selectedItems:SelectedItems = SelectedItems()
+    //
+    // @desc: Count of currently queued disable/enable UI requests.
+    fileprivate var _pendingDisableCount:uint = 0
     // MARK: end Data Members
     
     // MARK: Class overrides
@@ -115,8 +132,8 @@ class DataContertViewController: NSViewController
                 DispatchQueue.main.async
                 {
                     // Post a notification to update the enabled state of the UI
-                    let updateGenLstBtn:Notification = Notification(name: Notification.Name.HCEnableUserInterface, object: self, userInfo: nil)
-                    NotificationCenter.default.post(updateGenLstBtn)
+                    let enableUI:Notification = Notification(name: Notification.Name.HCEnableUserInterface, object: self, userInfo: nil)
+                    NotificationCenter.default.post(enableUI)
                 }
             }
         }
@@ -148,7 +165,8 @@ class DataContertViewController: NSViewController
                 // Ensure the user is aware of the potential consequences to their actions.
                 // TODO: Use a subview to allow the user to see all of the contacts in the group. For now - just use an alertable message.
                 let alert: NSAlert = NSAlert()
-                alert.messageText = "There are \(contacts.count) contacts in group '\(_selContactDestination.titleOfSelectedItem!)' that are about to be deleted."
+                let name:String = GetNameFromMenuItem(menuItem: mnuDest)
+                alert.messageText = "There are \(contacts.count) contacts in group '\(name)' that are about to be deleted."
                 alert.alertStyle = .warning
                 alert.informativeText = "Are you sure you want to contunue?"
                 alert.addButton(withTitle: "Cancel")
@@ -158,8 +176,8 @@ class DataContertViewController: NSViewController
                 // Only proceed if confirmed.
                 if (response == .alertSecondButtonReturn)
                 {
-                    // Start by disabling the generate list button to prevent ui re-entrancy
-                    _btnResetMailingList.isEnabled = false
+                    // Start by disabling the UI to prevent ui re-entrancy
+                    DisableUI()
                     
                     // Perform the operation on a background thread.
                     DispatchQueue.global(qos: .background).async
@@ -169,8 +187,9 @@ class DataContertViewController: NSViewController
                         // Wait until the background operation finishes.
                         DispatchQueue.main.async
                         {
-                            // Re-enable the Reset button
-                            self._btnResetMailingList.isEnabled = true
+                            // Post a notification to update the enabled state of the UI
+                            let enableUI:Notification = Notification(name: Notification.Name.HCEnableUserInterface, object: self, userInfo: nil)
+                            NotificationCenter.default.post(enableUI)
                         }
                     }
                 }
@@ -189,15 +208,18 @@ class DataContertViewController: NSViewController
     //
     @IBAction fileprivate func _selContactSource_doClick(_ sender: Any)
     {
-        // Start by disabling the UI to prevent ui re-entrancy
-        DisableUI()
-
-        // The source group has changed. Update the postal address labels.
-        // @remark: This operation will be performed on a background thread. This needs to be accounted for when determining if the Generate List button should be enabled.
-        resetPostalAddressOptions()
-        // The source group has changed. Update the relation name labels.
-        // @remark: This operation will be performed on a background thread. This needs to be accounted for when determining if the Generate List button should be enabled.
-        resetRelationNameOptions()
+        // Is there a change in the selection?
+        if (_selContactSource.selectedTag() != _selectedItems.source)
+        {
+            // Change made.
+            
+            // The source group has changed. Update the postal address labels.
+            // @remark: This operation will be performed on a background thread. This needs to be accounted for when determining if the Generate List button should be enabled.
+            resetPostalAddressOptions()
+            // The source group has changed. Update the relation name labels.
+            // @remark: This operation will be performed on a background thread. This needs to be accounted for when determining if the Generate List button should be enabled.
+            resetRelationNameOptions()
+        }
     }
     // MARK: end Action Handlers
     
@@ -221,9 +243,9 @@ class DataContertViewController: NSViewController
         let identifier:String = GetIdentifierFromMenuItem(menuItem: mnuItem)
         if (!identifier.isEmpty)
         {
-            // Start the busy indicator
-            _prgBusyIndicator.startAnimation(self)
-            
+            // Start by disabling the UI to prevent ui re-entrancy
+            DisableUI()
+
             // Populate the address labels
             // Especially when **ALL CONTACTS** was selected, this can
             // take some time. Perform the work on a background thread.
@@ -240,17 +262,16 @@ class DataContertViewController: NSViewController
                     for label in postalLabels
                     {
                         self._selPostalAddressLabels.addItem(withTitle: label)
+                        // Set the tag.
+                        if (self._selPostalAddressLabels.lastItem != nil)
+                        {
+                            self._selPostalAddressLabels.lastItem?.tag = self._selPostalAddressLabels.numberOfItems
+                        }
                     }
                     
-                    // Update the access to the field
-                    self._selPostalAddressLabels.isEnabled = (self._selPostalAddressLabels.numberOfItems > 0)
-                    
-                    // Stop the busy indicator.
-                    self._prgBusyIndicator.stopAnimation(self)
-                    
                     // Post a notification to update the enabled state of the UI
-                    let updateGenLstBtn:Notification = Notification(name: Notification.Name.HCEnableUserInterface, object: self, userInfo: nil)
-                    NotificationCenter.default.post(updateGenLstBtn)
+                    let enableUI:Notification = Notification(name: Notification.Name.HCEnableUserInterface, object: self, userInfo: nil)
+                    NotificationCenter.default.post(enableUI)
                 }
             }
         }
@@ -277,9 +298,9 @@ class DataContertViewController: NSViewController
         let identifier:String = GetIdentifierFromMenuItem(menuItem: mnuItem)
         if (!identifier.isEmpty)
         {
-            // Start the busy indicator
-            _prgBusyIndicator.startAnimation(self)
-            
+            // Start by disabling the UI to prevent ui re-entrancy
+            DisableUI()
+
             // Populate the address labels
             // Especially when **ALL CONTACTS** was selected, this can
             // take some time. Perform the work on a background thread.
@@ -296,17 +317,16 @@ class DataContertViewController: NSViewController
                     for label in relatedNameLabels
                     {
                         self._selRelationLabels.addItem(withTitle: label)
+                        // Set the tag.
+                        if (self._selRelationLabels.lastItem != nil)
+                        {
+                            self._selRelationLabels.lastItem?.tag = self._selRelationLabels.numberOfItems
+                        }
                     }
                     
-                    // Update the access to the field
-                    self._selRelationLabels.isEnabled = (self._selRelationLabels.numberOfItems > 0)
-                    
-                    // Stop the busy indicator.
-                    self._prgBusyIndicator.stopAnimation(self)
-                    
                     // Post a notification to update the enabled state of the UI
-                    let updateGenLstBtn:Notification = Notification(name: Notification.Name.HCEnableUserInterface, object: self, userInfo: nil)
-                    NotificationCenter.default.post(updateGenLstBtn)
+                    let enableUI:Notification = Notification(name: Notification.Name.HCEnableUserInterface, object: self, userInfo: nil)
+                    NotificationCenter.default.post(enableUI)
                 }
             }
         }
@@ -326,8 +346,8 @@ class DataContertViewController: NSViewController
         // Prefix for indenting groups in the source view list.
         let contactGroupPrefix:String = String("    ")
         
-        // The UI is ready, stop the busy indicator
-        _prgBusyIndicator.stopAnimation(self)
+        // Reset the count of pending disable requests.
+        _pendingDisableCount = 0
         
         // Create/Initialize the Holiday Card Processor
         _hcp = HolidayCardProcessor()
@@ -398,9 +418,9 @@ class DataContertViewController: NSViewController
         // Initialize the contact relation options.
         resetRelationNameOptions()
         
-        // Update the ui control elements
+        // Attempt to enable the UI
         EnableUI()
-        
+
         // Set focus to the generate button
         _btnGenerateList.becomeFirstResponder()
     }
@@ -440,12 +460,35 @@ class DataContertViewController: NSViewController
     //
     @objc fileprivate func EnableUI() -> Void
     {
-        _selContactSource.isEnabled = (_selContactSource.numberOfItems > 0)
-        _selContactDestination.isEnabled = (_selContactDestination.numberOfItems > 0)
-        _btnResetMailingList.isEnabled = (_selContactDestination.numberOfItems > 0)
+        // Decrement the pending count
+        if (_pendingDisableCount > 0)
+        {
+            _pendingDisableCount -= 1
+        }
+        
+        // Are there any disable operations still pending?
+        if (_pendingDisableCount == 0)
+        {
+            // All clear. Enable the UI
+            
+            _selContactSource.isEnabled = (_selContactSource.numberOfItems > 0)
+            _selContactDestination.isEnabled = (_selContactDestination.numberOfItems > 0)
+            _selRelationLabels.isEnabled = (_selRelationLabels.numberOfItems > 0)
+            _selPostalAddressLabels.isEnabled = (_selPostalAddressLabels.numberOfItems > 0)
+            _btnResetMailingList.isEnabled = (_selContactDestination.numberOfItems > 0)
 
-        // Enable/Disable the generate list button if wither the postal addresses or relation names are empty
-        _btnGenerateList.isEnabled = ((_selContactSource.numberOfItems > 0) && (_selRelationLabels.numberOfItems > 0) && (_selPostalAddressLabels.numberOfItems > 0))
+            // Enable/Disable the generate list button if either the postal addresses or relation names are empty
+            _btnGenerateList.isEnabled = ((_selContactSource.numberOfItems > 0) && (_selRelationLabels.numberOfItems > 0) && (_selPostalAddressLabels.numberOfItems > 0))
+            
+            // Refresh the selected items
+            _selectedItems.source       = ((_selContactSource.numberOfItems > 0)        ? UInt32(_selContactSource.selectedTag()) : 0)
+            _selectedItems.destination  = ((_selContactDestination.numberOfItems > 0)   ? UInt32(_selContactDestination.selectedTag()) : 0)
+            _selectedItems.postal       = ((_selPostalAddressLabels.numberOfItems > 0)  ? UInt32(_selPostalAddressLabels.selectedTag()) : 0)
+            _selectedItems.relation     = ((_selRelationLabels.numberOfItems > 0)       ? UInt32(_selRelationLabels.selectedTag()) : 0)
+
+            // The UI is ready, stop the busy indicator
+            _prgBusyIndicator.stopAnimation(self)
+        }
     }
     
     //
@@ -457,10 +500,45 @@ class DataContertViewController: NSViewController
     //
     @objc fileprivate func DisableUI() -> Void
     {
+        // If we are disabling the UI, it is because we are busy.
+        _prgBusyIndicator.startAnimation(self)
+        
         _selContactSource.isEnabled = false
         _selContactDestination.isEnabled = false
+        _selRelationLabels.isEnabled = false
+        _selPostalAddressLabels.isEnabled = false
         _btnResetMailingList.isEnabled = false
         _btnGenerateList.isEnabled = false
+        
+        // Increment the count of pending disable.
+        _pendingDisableCount += 1
+    }
+    
+    //
+    // @desc:   Helper to get the ContactSource to use with the Holiday Card Processor
+    //
+    // @param:  menuItem:    The menu seleciton item with the associated target.
+    //
+    // @return: ContactSource item associated with this menu item. nil if there there is not a matching item registered,
+    //
+    // @remarks:None
+    //
+    fileprivate func GetContactSourceFromMenuItem(menuItem:NSMenuItem?) -> HolidayCardProcessor.ContactSource?
+    {
+        var source:HolidayCardProcessor.ContactSource? = nil
+        
+        // Is the menu item valid
+        if (menuItem != nil)
+        {
+            // Get the tag associated with the menu item
+            let tag:uint = UInt32(menuItem!.tag)
+            
+            // Just set the return. If there is not a match, then the
+            // value assigned will be nil
+            source = _mapMenuItems[tag]
+        }
+        
+        return source
     }
     
     //
@@ -476,20 +554,41 @@ class DataContertViewController: NSViewController
     {
         var identifier:String = String()
         
+        let source:HolidayCardProcessor.ContactSource? = GetContactSourceFromMenuItem(menuItem: menuItem)
+        
         // Is the menu item valid
-        if (menuItem != nil)
+        if (source != nil)
         {
-            // Get the tag associated with the menu item
-            let tag:uint = UInt32(menuItem!.tag)
-            
-            // Is the tag registered in the database?
-            if (_mapMenuItems[tag] != nil)
-            {
-                identifier = (_mapMenuItems[tag]?.identifier)!
-            }
+            // Get the identifuer from the source item.
+            identifier = source!.identifier
         }
         
         return identifier
+    }
+    
+    //
+    // @desc:   Helper to get the name to use with the Holiday Card Processor
+    //
+    // @param:  menuItem:    The menu seleciton item with the associated target.
+    //
+    // @return: Identifier string.
+    //
+    // @remarks:None
+    //
+    fileprivate func GetNameFromMenuItem(menuItem:NSMenuItem?) -> String
+    {
+        var name:String = String()
+        
+        let source:HolidayCardProcessor.ContactSource? = GetContactSourceFromMenuItem(menuItem: menuItem)
+        
+        // Is the menu item valid
+        if (source != nil)
+        {
+            // Get the identifuer from the source item.
+            name = source!.name
+        }
+        
+        return name
     }
     // MARK: end Private helper methods
 }
