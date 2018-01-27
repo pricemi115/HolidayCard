@@ -19,4 +19,5 @@ extension Notification.Name
     static let HCHolidayCardError       = Notification.Name("HCHolidayCardError")
     static let HCEnableUserInterface    = Notification.Name("HCEnableUserInterface")
     static let HCModeChange             = Notification.Name("HCModeChange")
+    static let HCUpdateContactCounts    = Notification.Name("HCUpdateContactCounts")
 }

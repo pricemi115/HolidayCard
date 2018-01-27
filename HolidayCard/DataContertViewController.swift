@@ -16,6 +16,14 @@ class DataContertViewController: NSViewController
 {
     // MARK: Constants, Enumerations, & Structures.
     //
+    // @desc: String templates for displaying the selected contact counts.
+    //
+    fileprivate static let CONTACT_COUNT_UNKNOWN:String             = "----"
+    fileprivate static let CONTACT_COUNT_FILTERED:String            = "<FILTERED_COUNT>"
+    fileprivate static let CONTACT_COUNT_TOTAL:String               = "<TOTAL_COUNT>"
+    fileprivate static let MATCHING_CONTACT_COUNT_TEMPLATE:String   = CONTACT_COUNT_FILTERED + " of " + CONTACT_COUNT_TOTAL
+    fileprivate static let AFFECTED_CONTACT_COUNT_TEMPLATE:String   = CONTACT_COUNT_TOTAL
+    //
     // @desc: Structure for storing the currently selected menu items.
     //
     fileprivate struct SelectedItems
@@ -38,6 +46,8 @@ class DataContertViewController: NSViewController
     @IBOutlet fileprivate weak var _selContactDestination: NSPopUpButton!
     @IBOutlet fileprivate weak var _btnGenerateList: NSButton!
     @IBOutlet fileprivate weak var _btnResetMailingList: NSButton!
+    @IBOutlet fileprivate weak var _lblMatchingContactCountSource: NSTextField!
+    @IBOutlet fileprivate weak var _lblAffectedContactCountDest: NSTextField!
     // MARK: end Properties
     
     // MARK: Data Members
@@ -86,6 +96,7 @@ class DataContertViewController: NSViewController
         nc.addObserver(self, selector: #selector(InitializeUI), name: Notification.Name.CNPermissionGranted, object: nil)
         nc.addObserver(self, selector: #selector(EnableUI), name: Notification.Name.HCEnableUserInterface, object: nil)
         nc.addObserver(self, selector: #selector(ModeChange(_:)), name: Notification.Name.HCModeChange, object: nil)
+        nc.addObserver(self, selector: #selector(UpdateContactCounts), name: Notification.Name.HCUpdateContactCounts, object: nil)
     }
     // MARK: end Class overrides
     
@@ -153,43 +164,73 @@ class DataContertViewController: NSViewController
         if ((_selContactDestination.numberOfItems > 0) &&
             (_selContactDestination.selectedItem?.isEnabled)!)
         {
+            // Start by disabling the UI to prevent ui re-entrancy
+            DisableUI()
+            
             // Get menu item for the destination group that is currently selected.
             let mnuDest:NSMenuItem? = _selContactDestination.selectedItem
             let groupId:String = GetIdentifierFromMenuItem(menuItem: mnuDest)
-            // Find out how many "potential" contacts will be eliminated.
-            let contacts:[CNContact] = _hcp.GetContactsFromSource(sourceId: groupId)
-            
-            // Don't worry about doing anything if there are no contacts in the group.
-            if (contacts.count > 0)
+            // Find out how many "potential" contacts will be eliminated, but do this
+            // on a worker thread
+            // Populate the address labels
+            // Especially when **ALL CONTACTS** was selected, this can
+            // take some time. Perform the work on a background thread.
+            // Perform the operation on a background thread.
+            DispatchQueue.global(qos: .background).async
             {
-                // Ensure the user is aware of the potential consequences to their actions.
-                // TODO: Use a subview to allow the user to see all of the contacts in the group. For now - just use an alertable message.
-                let alert: NSAlert = NSAlert()
-                let name:String = GetNameFromMenuItem(menuItem: mnuDest)
-                alert.messageText = "There are \(contacts.count) contacts in group '\(name)' that are about to be deleted."
-                alert.alertStyle = .warning
-                alert.informativeText = "Are you sure you want to contunue?"
-                alert.addButton(withTitle: "Cancel")
-                alert.addButton(withTitle: "Proceed")
-                // Pose the confirmation
-                let response: NSApplication.ModalResponse = alert.runModal()
-                // Only proceed if confirmed.
-                if (response == .alertSecondButtonReturn)
+                // Determine the nubmer of contats in the destination.
+                let contactCount = self._hcp.GetGontactCount(sourceId: groupId, addrSource: nil, relatedNameSource: nil).totalContacts
+                
+                // Wait until the background operation finishes.
+                DispatchQueue.main.async
                 {
-                    // Start by disabling the UI to prevent ui re-entrancy
-                    DisableUI()
+                    // Post a notification to update the enabled state of the UI,
+                    // we may well be re-disabling the UI depending on the users selection of proceed or not.
+                    let enableUI:Notification = Notification(name: Notification.Name.HCEnableUserInterface, object: self, userInfo: nil)
+                    NotificationCenter.default.post(enableUI)
                     
-                    // Perform the operation on a background thread.
-                    DispatchQueue.global(qos: .background).async
+                    // Don't worry about doing anything if there are no contacts in the group.
+                    if (contactCount > 0)
                     {
-                        self._hcp.FlushAllGroupContacts(sourceId: groupId)
-                        
-                        // Wait until the background operation finishes.
-                        DispatchQueue.main.async
+                        // Ensure the user is aware of the potential consequences to their actions.
+                        // TODO: Use a subview to allow the user to see all of the contacts in the group. For now - just use an alertable message.
+                        let alert: NSAlert = NSAlert()
+                        let name:String = self.GetNameFromMenuItem(menuItem: mnuDest)
+                        // TODO: Use string substitution for the alert message ??
+                        if (contactCount == 1)
                         {
-                            // Post a notification to update the enabled state of the UI
-                            let enableUI:Notification = Notification(name: Notification.Name.HCEnableUserInterface, object: self, userInfo: nil)
-                            NotificationCenter.default.post(enableUI)
+                            alert.messageText = "There is \(contactCount) contact in group '\(name)' that is about to be deleted."
+                        }
+                        else
+                        {
+                            alert.messageText = "There are \(contactCount) contacts in group '\(name)' that are about to be deleted."
+                        }
+                        alert.alertStyle = .warning
+                        alert.informativeText = "Are you sure you want to proceed?"
+                        alert.addButton(withTitle: "Cancel")
+                        alert.addButton(withTitle: "Proceed")
+                        // Pose the confirmation
+                        let response: NSApplication.ModalResponse = alert.runModal()
+                        // Only proceed if confirmed.
+                        if (response == .alertSecondButtonReturn)
+                        {
+                            // Disable the UI again.
+                            self.DisableUI()
+                            
+                            // Perform the operation on a background thread.
+                            DispatchQueue.global(qos: .background).async
+                            {
+                                // Flush the selected group.
+                                self._hcp.FlushAllGroupContacts(sourceId: groupId)
+                                
+                                // Wait until the background operation finishes.
+                                DispatchQueue.main.async
+                                {
+                                    // Post a notification to update the enabled state of the UI
+                                    let enableUI:Notification = Notification(name: Notification.Name.HCEnableUserInterface, object: self, userInfo: nil)
+                                    NotificationCenter.default.post(enableUI)
+                                }
+                            }
                         }
                     }
                 }
@@ -198,7 +239,7 @@ class DataContertViewController: NSViewController
     }
     
     //
-    // @desc:   Handler for the doClick event of the Source Group selection
+    // @desc:   Handler for the doClick event of the Contact Source selection
     //
     // @param:  Not used
     //
@@ -213,12 +254,75 @@ class DataContertViewController: NSViewController
         {
             // Change made.
             
+            // Reset the contact count displays
+            ResetContactCounts()
+            
             // The source group has changed. Update the postal address labels.
             // @remark: This operation will be performed on a background thread. This needs to be accounted for when determining if the Generate List button should be enabled.
             resetPostalAddressOptions()
             // The source group has changed. Update the relation name labels.
             // @remark: This operation will be performed on a background thread. This needs to be accounted for when determining if the Generate List button should be enabled.
             resetRelationNameOptions()
+        }
+    }
+    
+    //
+    // @desc:   Handler for the doClick event of the Relation Name selection
+    //
+    // @param:  Not used
+    //
+    // @return: None
+    //
+    // @remarks:None
+    //
+    @IBAction fileprivate func _selRelationName_doClick(_ sender: Any)
+    {
+        // Is there a change in the selection?
+        if (_selRelationLabels.selectedTag() != _selectedItems.relation)
+        {
+            // Update the contact counts.
+            ResetContactCounts()
+            UpdateContactCounts()
+        }
+    }
+    
+    //
+    // @desc:   Handler for the doClick event of the Postal Address selection
+    //
+    // @param:  Not used
+    //
+    // @return: None
+    //
+    // @remarks:None
+    //
+    @IBAction fileprivate func _selPostalAddress_doClick(_ sender: Any)
+    {
+        // Is there a change in the selection?
+        if (_selPostalAddressLabels.selectedTag() != _selectedItems.postal)
+        {
+            // Update the contact counts.
+            ResetContactCounts()
+            UpdateContactCounts()
+        }
+    }
+    
+    //
+    // @desc:   Handler for the doClick event of the Postal Address selection
+    //
+    // @param:  Not used
+    //
+    // @return: None
+    //
+    // @remarks:None
+    //
+    @IBAction func _selContactDestination_doClick(_ sender: Any)
+    {
+        // Is there a change in the selection?
+        if (_selContactDestination.selectedTag() != _selectedItems.destination)
+        {
+            // Update the contact counts.
+            ResetContactCounts()
+            UpdateContactCounts()
         }
     }
     // MARK: end Action Handlers
@@ -349,7 +453,15 @@ class DataContertViewController: NSViewController
         // Reset the count of pending disable requests.
         _pendingDisableCount = 0
         
+        // Reset the contact count data
+        ResetContactCounts()
+        
+        // Disable the UI
+        DisableUI()
+        
         // Create/Initialize the Holiday Card Processor
+        // Note: Calls made upon this object can be lengthy. It is recommend to perform all (or most anyway)
+        //       calls on background worker threads.
         _hcp = HolidayCardProcessor()
         
         // Create a map of menu items for name-to-identifier
@@ -418,8 +530,9 @@ class DataContertViewController: NSViewController
         // Initialize the contact relation options.
         resetRelationNameOptions()
         
-        // Attempt to enable the UI
-        EnableUI()
+        // Post a notification to update the enabled state of the UI
+        let enableUI:Notification = Notification(name: Notification.Name.HCEnableUserInterface, object: self, userInfo: nil)
+        NotificationCenter.default.post(enableUI)
 
         // Set focus to the generate button
         _btnGenerateList.becomeFirstResponder()
@@ -485,9 +598,16 @@ class DataContertViewController: NSViewController
             _selectedItems.destination  = ((_selContactDestination.numberOfItems > 0)   ? UInt32(_selContactDestination.selectedTag()) : 0)
             _selectedItems.postal       = ((_selPostalAddressLabels.numberOfItems > 0)  ? UInt32(_selPostalAddressLabels.selectedTag()) : 0)
             _selectedItems.relation     = ((_selRelationLabels.numberOfItems > 0)       ? UInt32(_selRelationLabels.selectedTag()) : 0)
+            
+            _lblMatchingContactCountSource.isEnabled = true
+            _lblAffectedContactCountDest.isEnabled = true
 
             // The UI is ready, stop the busy indicator
             _prgBusyIndicator.stopAnimation(self)
+            
+            // Post a notification to update the Contact Count displays
+            let updateContactCountDisplays:Notification = Notification(name: Notification.Name.HCUpdateContactCounts, object: self, userInfo: nil)
+            NotificationCenter.default.post(updateContactCountDisplays)
         }
     }
     
@@ -498,7 +618,7 @@ class DataContertViewController: NSViewController
     //
     // @return: None
     //
-    @objc fileprivate func DisableUI() -> Void
+    fileprivate func DisableUI() -> Void
     {
         // If we are disabling the UI, it is because we are busy.
         _prgBusyIndicator.startAnimation(self)
@@ -510,8 +630,130 @@ class DataContertViewController: NSViewController
         _btnResetMailingList.isEnabled = false
         _btnGenerateList.isEnabled = false
         
+        _lblMatchingContactCountSource.isEnabled = false
+        _lblAffectedContactCountDest.isEnabled = false
+        
         // Increment the count of pending disable.
         _pendingDisableCount += 1
+    }
+    
+    //
+    // @desc:   Read-only helper to get the default string for the matching contact count displays
+    //
+    // @param:  None
+    //
+    // @return: Default count string
+    //
+    // @remarks:Used to know when UpdateContactCounts needs to do something and to reset/initialize the UI
+    //
+    fileprivate var DefaultMatchingContactCount: (String)!
+    {
+        get
+        {
+            // Specify the default value of the contact count display.
+            var defaultDisplay:String = DataContertViewController.MATCHING_CONTACT_COUNT_TEMPLATE
+            defaultDisplay = defaultDisplay.replacingOccurrences(of: DataContertViewController.CONTACT_COUNT_FILTERED, with: DataContertViewController.CONTACT_COUNT_UNKNOWN, options: .literal, range: nil)
+            defaultDisplay = defaultDisplay.replacingOccurrences(of: DataContertViewController.CONTACT_COUNT_TOTAL, with: DataContertViewController.CONTACT_COUNT_UNKNOWN, options: .literal, range: nil)
+
+            return defaultDisplay
+        }
+    }
+    
+    //
+    // @desc:   Read-only helper to get the default string for the affected contact count displays
+    //
+    // @param:  None
+    //
+    // @return: Default count string
+    //
+    // @remarks:Used to know when UpdateContactCounts needs to do something and to reset/initialize the UI
+    //
+    fileprivate var DefaultAffectedContactCount: (String)!
+    {
+        get
+        {
+            // Specify the default value of the contact count display.
+            var defaultDisplay:String = DataContertViewController.AFFECTED_CONTACT_COUNT_TEMPLATE
+            defaultDisplay = defaultDisplay.replacingOccurrences(of: DataContertViewController.CONTACT_COUNT_TOTAL, with: DataContertViewController.CONTACT_COUNT_UNKNOWN, options: .literal, range: nil)
+            
+            return defaultDisplay
+        }
+    }
+    
+    //
+    // @desc:   Helper to reset the display labels showing the contact counts.
+    //
+    // @param:  None
+    //
+    // @return: None
+    //
+    // @remarks:
+    //
+    fileprivate func ResetContactCounts() -> Void
+    {
+        // Reset the matching contact display data
+        _lblMatchingContactCountSource.stringValue  = DefaultMatchingContactCount
+        _lblAffectedContactCountDest.stringValue    = DefaultAffectedContactCount
+    }
+    
+    //
+    // @desc:   Helper to update the display labels showing the contact counts.
+    //
+    // @param:  None
+    //
+    // @return: None
+    //
+    // @remarks:None
+    //
+    @objc  fileprivate func UpdateContactCounts() -> Void
+    {
+        if ((DefaultMatchingContactCount.caseInsensitiveCompare(_lblMatchingContactCountSource.stringValue) == .orderedSame) ||
+            (DefaultAffectedContactCount.caseInsensitiveCompare(_lblAffectedContactCountDest.stringValue) == .orderedSame))
+        {
+            // Update the contact contact counts for the Source.
+            // Get the menu item for the selected source item
+            let sourceMenuItem:NSMenuItem? = _selContactSource.selectedItem
+            // Get the identifier from the ContactSource associated to the menu selection.
+            let sourceIdentifier:String = GetIdentifierFromMenuItem(menuItem: sourceMenuItem)
+            // Get the selected postal address.
+            let addressSource:String    = ((_selPostalAddressLabels.titleOfSelectedItem != nil) ? _selPostalAddressLabels.titleOfSelectedItem! : String())
+            // Get the name of the related contact label to use for the mailing list.
+            let nameSource:String       = ((_selRelationLabels.titleOfSelectedItem != nil) ? _selRelationLabels.titleOfSelectedItem! : String())
+            
+            // Get the menu item for the selected destination item
+            let destMenuItem:NSMenuItem? = _selContactDestination.selectedItem
+            // Get the identifier from the ContactSource associated to the menu selection.
+            let destIdentifier:String = GetIdentifierFromMenuItem(menuItem: destMenuItem)
+            
+            // Perform the updates on a background thread.
+            DisableUI()
+            DispatchQueue.global(qos: .background).async
+            {
+                let sourceCounts:(totalContacts:uint, filteredContacts:uint) = self._hcp.GetGontactCount(sourceId: sourceIdentifier, addrSource: addressSource, relatedNameSource: nameSource)
+                
+                // Get the destination contact counts on a background worker thead
+                let destCounts:(totalContacts:uint, filteredContacts:uint) = self._hcp.GetGontactCount(sourceId: destIdentifier, addrSource: nil, relatedNameSource: nil)
+                
+                // Wait until the background operation finishes.
+                DispatchQueue.main.async
+                {
+                    // Update the contact counts for the source.
+                    var workerLabel:String = DataContertViewController.MATCHING_CONTACT_COUNT_TEMPLATE
+                    workerLabel = workerLabel.replacingOccurrences(of: DataContertViewController.CONTACT_COUNT_FILTERED, with: String(sourceCounts.filteredContacts), options: .literal, range: nil)
+                    workerLabel = workerLabel.replacingOccurrences(of: DataContertViewController.CONTACT_COUNT_TOTAL, with: String(sourceCounts.totalContacts), options: .literal, range: nil)
+                    self._lblMatchingContactCountSource.stringValue = workerLabel
+                    
+                    // Update the contact counts for the destination.
+                    workerLabel = DataContertViewController.AFFECTED_CONTACT_COUNT_TEMPLATE
+                    workerLabel = workerLabel.replacingOccurrences(of: DataContertViewController.CONTACT_COUNT_TOTAL, with: String(destCounts.totalContacts), options: .literal, range: nil)
+                    self._lblAffectedContactCountDest.stringValue = workerLabel
+
+                    // Post a notification to update the enabled state of the UI
+                    let enableUI:Notification = Notification(name: Notification.Name.HCEnableUserInterface, object: self, userInfo: nil)
+                    NotificationCenter.default.post(enableUI)
+                }
+            }
+        }
     }
     
     //
