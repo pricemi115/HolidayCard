@@ -142,6 +142,10 @@ class DataContertViewController: NSViewController
                 // Wait until the background operation finishes.
                 DispatchQueue.main.async
                 {
+                    // Since the content of the destination group has changed, reset the counts prior to re-enabling the
+                    // UI. This will result in the counts being re-evaluated.
+                    self.ResetContactCounts()
+                    
                     // Post a notification to update the enabled state of the UI
                     let enableUI:Notification = Notification(name: Notification.Name.HCEnableUserInterface, object: self, userInfo: nil)
                     NotificationCenter.default.post(enableUI)
@@ -226,6 +230,10 @@ class DataContertViewController: NSViewController
                                 // Wait until the background operation finishes.
                                 DispatchQueue.main.async
                                 {
+                                    // Since the content of the destination group has changed, reset the counts prior to re-enabling the
+                                    // UI. This will result in the counts being re-evaluated.
+                                    self.ResetContactCounts()
+                                    
                                     // Post a notification to update the enabled state of the UI
                                     let enableUI:Notification = Notification(name: Notification.Name.HCEnableUserInterface, object: self, userInfo: nil)
                                     NotificationCenter.default.post(enableUI)
