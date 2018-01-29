@@ -769,6 +769,28 @@
                                             <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                                         </textFieldCell>
                                     </textField>
+                                    <button identifier="_btnPreview" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="vlt-Ho-gSu" userLabel="Preview List Button">
+                                        <rect key="frame" x="218" y="13" width="128" height="32"/>
+                                        <autoresizingMask key="autoresizingMask" flexibleMinY="YES"/>
+                                        <buttonCell key="cell" type="push" title="Preview" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="ScX-sg-sOP">
+                                            <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                                            <font key="font" metaFont="system"/>
+                                        </buttonCell>
+                                        <connections>
+                                            <action selector="_btnPreview_doClick:" target="bD2-fc-fam" id="7cT-ZC-5gM"/>
+                                        </connections>
+                                    </button>
+                                    <button identifier="_btnViewErrors" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="BfW-na-e6P" userLabel="View Errors Button">
+                                        <rect key="frame" x="90" y="13" width="128" height="32"/>
+                                        <autoresizingMask key="autoresizingMask" flexibleMinY="YES"/>
+                                        <buttonCell key="cell" type="push" title="View Errors" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="wkg-M8-Nvk">
+                                            <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                                            <font key="font" metaFont="system"/>
+                                        </buttonCell>
+                                        <connections>
+                                            <action selector="_btnViewErrors_doClick:" target="bD2-fc-fam" id="yO8-Kg-hZb"/>
+                                        </connections>
+                                    </button>
                                 </subviews>
                             </customView>
                         </subviews>
@@ -788,7 +810,9 @@
                     </view>
                     <connections>
                         <outlet property="_btnGenerateList" destination="G5T-ar-SjW" id="E6c-EE-VOJ"/>
+                        <outlet property="_btnPreview" destination="vlt-Ho-gSu" id="P46-Yf-u2Y"/>
                         <outlet property="_btnResetMailingList" destination="XPu-fM-Xjj" id="Bqf-BW-Wq9"/>
+                        <outlet property="_btnViewErrors" destination="BfW-na-e6P" id="O2y-qu-D9r"/>
                         <outlet property="_lblAffectedContactCountDest" destination="4jl-3W-ZOO" id="gYK-yR-2ky"/>
                         <outlet property="_lblMatchingContactCountSource" destination="biQ-6V-Ygk" id="IaN-s7-Kp2"/>
                         <outlet property="_prgBusyIndicator" destination="uBC-1s-M5H" id="yz5-J7-sRJ"/>

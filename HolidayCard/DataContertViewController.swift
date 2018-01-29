@@ -46,6 +46,8 @@ class DataContertViewController: NSViewController
     @IBOutlet fileprivate weak var _selContactDestination: NSPopUpButton!
     @IBOutlet fileprivate weak var _btnGenerateList: NSButton!
     @IBOutlet fileprivate weak var _btnResetMailingList: NSButton!
+    @IBOutlet fileprivate weak var _btnPreview: NSButton!
+    @IBOutlet fileprivate weak var _btnViewErrors: NSButton!
     @IBOutlet fileprivate weak var _lblMatchingContactCountSource: NSTextField!
     @IBOutlet fileprivate weak var _lblAffectedContactCountDest: NSTextField!
     // MARK: end Properties
@@ -66,6 +68,9 @@ class DataContertViewController: NSViewController
     //
     // @desc: Count of currently queued disable/enable UI requests.
     fileprivate var _pendingDisableCount:uint = 0
+    //
+    // @desc: Cached Contact Counts
+    fileprivate var _contactCounts:(sourceTotal:uint, sourceFiltered:uint, destTotal:uint) = (0, 0, 0)
     // MARK: end Data Members
     
     // MARK: Class overrides
@@ -244,6 +249,50 @@ class DataContertViewController: NSViewController
                 }
             }
         }
+    }
+    
+    //
+    // @desc:   Handler for the doClick event of the Preview button
+    //
+    // @param:  Not used
+    //
+    // @return: None
+    //
+    // @remarks:None
+    //
+    @IBAction fileprivate func _btnPreview_doClick(_ sender: Any)
+    {
+        // Start by disabling the UI to prevent ui re-entrancy
+        DisableUI()
+
+        // TODO: Implement Preview
+        print("Do Preview...")
+        
+        // Post a notification to update the enabled state of the UI
+        let enableUI:Notification = Notification(name: Notification.Name.HCEnableUserInterface, object: self, userInfo: nil)
+        NotificationCenter.default.post(enableUI)
+    }
+    
+    //
+    // @desc:   Handler for the doClick event of the View Errors button
+    //
+    // @param:  Not used
+    //
+    // @return: None
+    //
+    // @remarks:None
+    //
+    @IBAction fileprivate func _btnViewErrors_doClick(_ sender: Any)
+    {
+        // Start by disabling the UI to prevent ui re-entrancy
+        DisableUI()
+        
+        // TODO: Implement Preview
+        print("Do ViewError...")
+        
+        // Post a notification to update the enabled state of the UI
+        let enableUI:Notification = Notification(name: Notification.Name.HCEnableUserInterface, object: self, userInfo: nil)
+        NotificationCenter.default.post(enableUI)
     }
     
     //
@@ -474,12 +523,13 @@ class DataContertViewController: NSViewController
         
         // Create a map of menu items for name-to-identifier
         _mapMenuItems = Dictionary<uint, HolidayCardProcessor.ContactSource>()
-        
+
         // Get the list of contact groups available.
         let contactSources:[HolidayCardProcessor.ContactSource] = _hcp.GetContactSources
         // Reset/Re-Populate the group selection lists.
         _selContactSource.removeAllItems()
         _selContactDestination.removeAllItems()
+        
         // Start the tag count at 1 to avoid default values
         var tag:uint = 1
         for source in contactSources
@@ -531,7 +581,7 @@ class DataContertViewController: NSViewController
                 break
             }
         }
-        
+
         // Initialize the postal address options.
         resetPostalAddressOptions()
         
@@ -559,11 +609,6 @@ class DataContertViewController: NSViewController
     {
         // Get the new mode.
         let mode:SideBarViewController.SIDEBAR_MODE? = notification.userInfo?["mode"] as? SideBarViewController.SIDEBAR_MODE
-        
-        if (mode != nil)
-        {
-            print("New Mode \(mode!)")
-        }
         
         // Update the view visability
         _viewDestinationContent.isHidden    = (SideBarViewController.SIDEBAR_MODE.sourceMode == mode)
@@ -596,10 +641,17 @@ class DataContertViewController: NSViewController
             _selContactDestination.isEnabled = (_selContactDestination.numberOfItems > 0)
             _selRelationLabels.isEnabled = (_selRelationLabels.numberOfItems > 0)
             _selPostalAddressLabels.isEnabled = (_selPostalAddressLabels.numberOfItems > 0)
-            _btnResetMailingList.isEnabled = (_selContactDestination.numberOfItems > 0)
+            _btnResetMailingList.isEnabled = ((_selContactDestination.numberOfItems > 0) && (_contactCounts.destTotal > 0))
 
-            // Enable/Disable the generate list button if either the postal addresses or relation names are empty
-            _btnGenerateList.isEnabled = ((_selContactSource.numberOfItems > 0) && (_selRelationLabels.numberOfItems > 0) && (_selPostalAddressLabels.numberOfItems > 0))
+            // Enable/Disable the generate list button if either the postal addresses or relation names are empty or there are no matching contacts.
+            _btnGenerateList.isEnabled = ((_selContactSource.numberOfItems > 0) && (_contactCounts.sourceFiltered > 0) && (_contactCounts.destTotal == 0) &&
+                                          (_selRelationLabels.numberOfItems > 0) && (_selPostalAddressLabels.numberOfItems > 0))
+            
+            // Enable/Disable the View Errors button based on the source filtered and total counts matching.
+            _btnViewErrors.isEnabled = (_contactCounts.sourceFiltered != _contactCounts.sourceTotal)
+            
+            // Enable/Disable the Preview button based on the source filtered count.
+            _btnPreview.isEnabled = (_contactCounts.sourceFiltered > 0)
             
             // Refresh the selected items
             _selectedItems.source       = ((_selContactSource.numberOfItems > 0)        ? UInt32(_selContactSource.selectedTag()) : 0)
@@ -637,6 +689,8 @@ class DataContertViewController: NSViewController
         _selPostalAddressLabels.isEnabled = false
         _btnResetMailingList.isEnabled = false
         _btnGenerateList.isEnabled = false
+        _btnPreview.isEnabled = false
+        _btnViewErrors.isEnabled = false
         
         _lblMatchingContactCountSource.isEnabled = false
         _lblAffectedContactCountDest.isEnabled = false
@@ -702,6 +756,11 @@ class DataContertViewController: NSViewController
         // Reset the matching contact display data
         _lblMatchingContactCountSource.stringValue  = DefaultMatchingContactCount
         _lblAffectedContactCountDest.stringValue    = DefaultAffectedContactCount
+        
+        // Reset the cached contact counts
+        _contactCounts.sourceTotal      = 0
+        _contactCounts.sourceFiltered   = 0
+        _contactCounts.destTotal        = 0
     }
     
     //
@@ -745,15 +804,20 @@ class DataContertViewController: NSViewController
                 // Wait until the background operation finishes.
                 DispatchQueue.main.async
                 {
+                    // Record the contact counts
+                    self._contactCounts.sourceTotal     = sourceCounts.totalContacts
+                    self._contactCounts.sourceFiltered  = sourceCounts.filteredContacts
+                    self._contactCounts.destTotal       = destCounts.totalContacts
+                    
                     // Update the contact counts for the source.
                     var workerLabel:String = DataContertViewController.MATCHING_CONTACT_COUNT_TEMPLATE
-                    workerLabel = workerLabel.replacingOccurrences(of: DataContertViewController.CONTACT_COUNT_FILTERED, with: String(sourceCounts.filteredContacts), options: .literal, range: nil)
-                    workerLabel = workerLabel.replacingOccurrences(of: DataContertViewController.CONTACT_COUNT_TOTAL, with: String(sourceCounts.totalContacts), options: .literal, range: nil)
+                    workerLabel = workerLabel.replacingOccurrences(of: DataContertViewController.CONTACT_COUNT_FILTERED, with: String(self._contactCounts.sourceFiltered), options: .literal, range: nil)
+                    workerLabel = workerLabel.replacingOccurrences(of: DataContertViewController.CONTACT_COUNT_TOTAL, with: String(self._contactCounts.sourceTotal), options: .literal, range: nil)
                     self._lblMatchingContactCountSource.stringValue = workerLabel
                     
                     // Update the contact counts for the destination.
                     workerLabel = DataContertViewController.AFFECTED_CONTACT_COUNT_TEMPLATE
-                    workerLabel = workerLabel.replacingOccurrences(of: DataContertViewController.CONTACT_COUNT_TOTAL, with: String(destCounts.totalContacts), options: .literal, range: nil)
+                    workerLabel = workerLabel.replacingOccurrences(of: DataContertViewController.CONTACT_COUNT_TOTAL, with: String(self._contactCounts.destTotal), options: .literal, range: nil)
                     self._lblAffectedContactCountDest.stringValue = workerLabel
 
                     // Post a notification to update the enabled state of the UI
