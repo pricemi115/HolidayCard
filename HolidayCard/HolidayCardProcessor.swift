@@ -45,7 +45,14 @@ class HolidayCardProcessor : NSObject
         case Container   = 1
         case Group       = 2
     }
-    
+    //
+    // @desc: Enumeration for specifying the preview type
+    //
+    enum ContactPreviewType:Int
+    {
+        case Preview    = 0
+        case Error      = 1
+    }
     //
     // @desc: Structure specifying the data representing a contact source.
     //
@@ -54,6 +61,15 @@ class HolidayCardProcessor : NSObject
         var name:String             = String()
         var identifier:String       = String()
         var type:ContactSourceType  = ContactSourceType.Invalid
+    }
+    //
+    // @desc: Structure for mailing list preview and error reports
+    //
+    struct ContactInfo
+    {
+        var contactName:String      = String()
+        var mailingName:String      = String()
+        var mailingAddr:String      = String()
     }
     // MARK: end Constants, Enumerations, & Structures
     
@@ -243,6 +259,55 @@ class HolidayCardProcessor : NSObject
         }
         
         return success
+    }
+    
+    //
+    // @desc:   Preview the list mailing list
+    //
+    // @param:  previewType       - Type of preview report
+    // @param:  sourceId          - Identifier of the source providing contact data for the holiday mailing list.
+    // @param:  addrSource        - Label for the postal address to use for generating the mailing list.
+    // @param:  relatedNameSource - Label for the related name to use for generating the mailing list.
+    //
+    // @return: Array of ContactInfo structs representing the mailing list info
+    //
+    // @remarks:None
+    //
+    func GetMailingListPreview(previewType:ContactPreviewType,  sourceId: String, addrSource: String, relatedNameSource: String) -> [ContactInfo]
+    {
+        var mailingList:[ContactInfo] = [ContactInfo]()
+        
+        // Get the list
+        let contactList:[CNContact] = GetFilteredContacts(sourceId: sourceId, addrSource: addrSource, relatedNameSource: relatedNameSource, valid: (ContactPreviewType.Preview == previewType))
+        for contact:CNContact in contactList
+        {
+            let contactName:String = contact.familyName + ", " + contact.givenName
+            
+            var mailingName:String = String("* Missing *")
+            for relation:CNLabeledValue<CNContactRelation> in contact.contactRelations
+            {
+                if (relation.label?.caseInsensitiveCompare(relatedNameSource) == .orderedSame)
+                {
+                    mailingName = relation.value.name
+                    break
+                }
+            }
+            
+            var mailingAddress:String = String("* Missing *")
+            for address:CNLabeledValue<CNPostalAddress> in contact.postalAddresses
+            {
+                if (address.label?.caseInsensitiveCompare(addrSource) == .orderedSame)
+                {
+                    mailingAddress = address.value.street + ", " + address.value.city + ", " + address.value.state + ", " + address.value.postalCode
+                    break
+                }
+            }
+            
+            let newItem:ContactInfo = ContactInfo(contactName: contactName, mailingName: mailingName, mailingAddr: mailingAddress)
+            mailingList.append(newItem)
+        }
+        
+        return mailingList
     }
     
     //
@@ -524,7 +589,7 @@ class HolidayCardProcessor : NSObject
             }
             else
             {
-                let filteredContactList:[CNContact] = GetHolidayList(sourceId: sourceId, addrSource: addrSource!, relatedNameSource: relatedNameSource!, valid: true)
+                let filteredContactList:[CNContact] = GetFilteredContacts(sourceId: sourceId, addrSource: addrSource!, relatedNameSource: relatedNameSource!, valid: true)
                 filtered = UInt32(filteredContactList.count)
             }
         }
@@ -623,7 +688,7 @@ class HolidayCardProcessor : NSObject
 
     // MARK: Private methods & properties
     //
-    // @desc: Generates a list of immutable Holiday Contacts
+    // @desc: Generates a list of contacts matching the filter data provided.
     //
     // @param: sourceId          - Identifier of the source providing contact data for the holiday mailing list.
     // @param: addrSource        - Label for the postal address to use for generating the mailing list.
@@ -634,16 +699,16 @@ class HolidayCardProcessor : NSObject
     //
     // Remarks:     None
     //
-    private func GetHolidayList(sourceId: String, addrSource: String, relatedNameSource: String, valid: Bool) -> [CNContact]!
+    private func GetFilteredContacts(sourceId: String, addrSource: String, relatedNameSource: String, valid: Bool) -> [CNContact]!
     {
-        var holidayList:[CNMutableContact] = [CNMutableContact]()
+        var filteredList:[CNContact] = [CNContact]()
         
         // Get the requested source list for the holiday contacts
-        let holidayContacts:[CNContact] = GetContactsFromSource(sourceId: sourceId)
+        let sourceContacts:[CNContact] = GetContactsFromSource(sourceId: sourceId)
         
         // Iterate through the list of holiday contacts and create a modified
         // list suitable for label printing.
-        for contact:CNContact in holidayContacts
+        for contact:CNContact in sourceContacts
         {
             var holidayName: String = String()
             var holidayAddress: CNLabeledValue<CNPostalAddress> = CNLabeledValue<CNPostalAddress>()
@@ -668,22 +733,65 @@ class HolidayCardProcessor : NSObject
                 ((valid &&
                     ((holidayName.isEmpty == !valid) && (holidayAddress.value.street.isEmpty == !valid) && (holidayAddress.value.city.isEmpty == !valid))) ||
                     // Error candidates
-                 (!valid &&
-                    ((holidayName.isEmpty == !valid) || (holidayAddress.value.street.isEmpty == !valid) || (holidayAddress.value.city.isEmpty == !valid))))
+                    (!valid &&
+                        ((holidayName.isEmpty == !valid) || (holidayAddress.value.street.isEmpty == !valid) || (holidayAddress.value.city.isEmpty == !valid))))
             {
-                let newContact:CNMutableContact = CNMutableContact()
-                newContact.contactType = CNContactType.person
-                if (!holidayName.isEmpty)
-                {
-                    newContact.familyName = holidayName
-                }
-                if ((holidayAddress.label != nil) &&
-                    (!holidayAddress.label!.isEmpty))
-                {
-                    newContact.postalAddresses.append(holidayAddress)
-                }
-                holidayList.append(newContact)
+                filteredList.append(contact)
             }
+        }
+        
+        return filteredList
+    }
+
+    //
+    // @desc: Generates a list of immutable Holiday Contacts
+    //
+    // @param: sourceId          - Identifier of the source providing contact data for the holiday mailing list.
+    // @param: addrSource        - Label for the postal address to use for generating the mailing list.
+    // @param: relatedNameSource - Label for the related name to use for generating the mailing list.
+    // @param: valid             - Flag to indicate if the list is for valid contacts or contacts with errors.
+    //
+    // Return:      list of immutable CNContacts
+    //
+    // Remarks:     None
+    //
+    private func GetHolidayList(sourceId: String, addrSource: String, relatedNameSource: String, valid: Bool) -> [CNContact]!
+    {
+        var holidayList:[CNMutableContact] = [CNMutableContact]()
+        
+        // Get the requested source list for the holiday contacts
+        let holidayContacts:[CNContact] = GetFilteredContacts(sourceId: sourceId, addrSource: addrSource, relatedNameSource: relatedNameSource, valid: valid)
+        
+        // Iterate through the list of holiday contacts and create a modified
+        // list suitable for label printing.
+        for contact:CNContact in holidayContacts
+        {
+            // Note: Theee is no need to check the validity of this contact. This was validated in the call to GetFilteredContacts()
+            
+            // Generate a new contact that is friendly to Holiday Card Mailing Lists.
+            let newContact:CNMutableContact = CNMutableContact()
+            newContact.contactType = CNContactType.person
+
+            // Get the family name to use for this contact
+            for name:CNLabeledValue<CNContactRelation> in contact.contactRelations
+            {
+                if (name.label?.caseInsensitiveCompare(relatedNameSource) == .orderedSame)
+                {
+                    newContact.familyName = name.value.name
+                    break
+                }
+            }
+            // Get the postal address to use for this contact.
+            for address:CNLabeledValue<CNPostalAddress> in contact.postalAddresses
+            {
+                if (address.label?.caseInsensitiveCompare(addrSource) == .orderedSame)
+                {
+                    newContact.postalAddresses.append(address)
+                    break
+                }
+            }
+            
+            holidayList.append(newContact)
         }
         
         return holidayList as [CNContact]
@@ -735,7 +843,7 @@ class HolidayCardProcessor : NSObject
                     contactPredicates.append(pred)
                 }
             }
-            catch let error
+        catch let error
             {
                 // Get the stack trace
                 var stackTrace:String = "Stack Trace:"
@@ -760,7 +868,7 @@ class HolidayCardProcessor : NSObject
         if (contactPredicates.count > 0)
         {
             // Spefigy the keys that need to be acquired.
-            let keys = [CNContactRelationsKey, CNContactPostalAddressesKey]
+            let keys = [CNContactNamePrefixKey, CNContactGivenNameKey, CNContactFamilyNameKey, CNContactRelationsKey, CNContactPostalAddressesKey]
             
             do
             {

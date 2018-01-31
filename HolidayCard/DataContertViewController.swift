@@ -262,15 +262,8 @@ class DataContertViewController: NSViewController
     //
     @IBAction fileprivate func _btnPreview_doClick(_ sender: Any)
     {
-        // Start by disabling the UI to prevent ui re-entrancy
-        DisableUI()
-
-        // TODO: Implement Preview
-        print("Do Preview...")
-        
-        // Post a notification to update the enabled state of the UI
-        let enableUI:Notification = Notification(name: Notification.Name.HCEnableUserInterface, object: self, userInfo: nil)
-        NotificationCenter.default.post(enableUI)
+        // Generate the view
+        generateView(viewType: HolidayCardProcessor.ContactPreviewType.Preview)
     }
     
     //
@@ -284,15 +277,8 @@ class DataContertViewController: NSViewController
     //
     @IBAction fileprivate func _btnViewErrors_doClick(_ sender: Any)
     {
-        // Start by disabling the UI to prevent ui re-entrancy
-        DisableUI()
-        
-        // TODO: Implement Preview
-        print("Do ViewError...")
-        
-        // Post a notification to update the enabled state of the UI
-        let enableUI:Notification = Notification(name: Notification.Name.HCEnableUserInterface, object: self, userInfo: nil)
-        NotificationCenter.default.post(enableUI)
+        // Generate the view
+        generateView(viewType: HolidayCardProcessor.ContactPreviewType.Error)
     }
     
     //
@@ -385,6 +371,53 @@ class DataContertViewController: NSViewController
     // MARK: end Action Handlers
     
     // MARK: Private helper methods
+    // @desc:   Helper to rgenerate the Preview and Errors vies
+    //
+    // @param:  None
+    //
+    // @return: None
+    //
+    // @remarks:None
+    //
+    fileprivate func generateView(viewType:HolidayCardProcessor.ContactPreviewType)
+    {
+        // Get the menu item for the selected source item
+        let mnuItem:NSMenuItem? = _selContactSource.selectedItem
+        let sourceIdentifier:String = GetIdentifierFromMenuItem(menuItem: mnuItem)
+        // Get the name of the postal address label to use for the mailing list.
+        let address:String = _selPostalAddressLabels.titleOfSelectedItem!
+        // Get the name of the related contact label to use for the mailing list.
+        let name:String = _selRelationLabels.titleOfSelectedItem!
+        
+        // Start by disabling the UI to prevent ui re-entrancy
+        DisableUI()
+        
+        // Populate the address labels
+        // Especially when **ALL CONTACTS** was selected, this can
+        // take some time. Perform the work on a background thread.
+        // Perform the operation on a background thread.
+        DispatchQueue.global(qos: .background).async
+        {
+            // Get the list of labels
+            let mailingListPreview:[HolidayCardProcessor.ContactInfo] = self._hcp.GetMailingListPreview(previewType: viewType,
+                                                                                                        sourceId: sourceIdentifier, addrSource: address, relatedNameSource: name)
+            // Wait until the background operation finishes.
+            DispatchQueue.main.async
+            {
+                // DEBUG: Just print the results.
+                print("Printing \(viewType)...Begin")
+                for item:HolidayCardProcessor.ContactInfo in mailingListPreview
+                {
+                    print("CN:\(item.contactName) MN:\(item.mailingName) MA:\(item.mailingAddr)")
+                }
+                print("Printing \(viewType)...Done")
+                
+                // Post a notification to update the enabled state of the UI
+                let enableUI:Notification = Notification(name: Notification.Name.HCEnableUserInterface, object: self, userInfo: nil)
+                NotificationCenter.default.post(enableUI)
+            }
+        }
+    }
     // @desc:   Helper to reset the UI for the Postal Address selection
     //
     // @param:  None
