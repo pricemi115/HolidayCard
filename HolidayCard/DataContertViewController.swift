@@ -103,6 +103,37 @@ class DataContertViewController: NSViewController
         nc.addObserver(self, selector: #selector(ModeChange(_:)), name: Notification.Name.HCModeChange, object: nil)
         nc.addObserver(self, selector: #selector(UpdateContactCounts), name: Notification.Name.HCUpdateContactCounts, object: nil)
     }
+    
+    //
+    // @desc:   Class override for praparing to seque to another view controler
+    //
+    // @param:  segue:  The pending segue
+    // @paramL  sender: The object initiating the event.
+    //
+    // @return: None
+    //
+    // @remarks:Used to preview the mailing list data
+    //
+    override func prepare(for segue: NSStoryboardSegue, sender: Any?)
+    {
+        var previewType:HolidayCardProcessor.ContactPreviewType = HolidayCardProcessor.ContactPreviewType.Unknown
+        
+        // Determine the preview type based on the segue being invoked.
+        if (segue.identifier == NSStoryboardSegue.Identifier(rawValue: "mailingPreview"))
+        {
+            previewType = HolidayCardProcessor.ContactPreviewType.Preview
+        }
+        else if (segue.identifier == NSStoryboardSegue.Identifier(rawValue: "mailingErrors"))
+        {
+            previewType = HolidayCardProcessor.ContactPreviewType.Error
+        }
+        
+        // Generate the preview data.
+        // Note: This call will be performed on a background thread and should not be blocked.
+        //       When the background task completes, the view controler will be notified of the
+        //       data to be displayed.
+        generateView(viewType: previewType)
+    }
     // MARK: end Class overrides
     
     // MARK: Public Methods
@@ -252,36 +283,6 @@ class DataContertViewController: NSViewController
     }
     
     //
-    // @desc:   Handler for the doClick event of the Preview button
-    //
-    // @param:  Not used
-    //
-    // @return: None
-    //
-    // @remarks:None
-    //
-    @IBAction fileprivate func _btnPreview_doClick(_ sender: Any)
-    {
-        // Generate the view
-        generateView(viewType: HolidayCardProcessor.ContactPreviewType.Preview)
-    }
-    
-    //
-    // @desc:   Handler for the doClick event of the View Errors button
-    //
-    // @param:  Not used
-    //
-    // @return: None
-    //
-    // @remarks:None
-    //
-    @IBAction fileprivate func _btnViewErrors_doClick(_ sender: Any)
-    {
-        // Generate the view
-        generateView(viewType: HolidayCardProcessor.ContactPreviewType.Error)
-    }
-    
-    //
     // @desc:   Handler for the doClick event of the Contact Source selection
     //
     // @param:  Not used
@@ -392,15 +393,14 @@ class DataContertViewController: NSViewController
         // Start by disabling the UI to prevent ui re-entrancy
         DisableUI()
         
-        // Populate the address labels
+        // Populate the preview data
         // Especially when **ALL CONTACTS** was selected, this can
         // take some time. Perform the work on a background thread.
-        // Perform the operation on a background thread.
         DispatchQueue.global(qos: .background).async
         {
-            // Get the list of labels
-            let mailingListPreview:[HolidayCardProcessor.ContactInfo] = self._hcp.GetMailingListPreview(previewType: viewType,
-                                                                                                        sourceId: sourceIdentifier, addrSource: address, relatedNameSource: name)
+            // Get the preview data
+            let mailingListPreview:[HolidayCardProcessor.ContactInfo] = self._hcp.GetMailingListPreview(previewType: viewType, sourceId: sourceIdentifier, addrSource: address, relatedNameSource: name)
+            
             // Wait until the background operation finishes.
             DispatchQueue.main.async
             {

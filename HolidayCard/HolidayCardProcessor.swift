@@ -50,6 +50,7 @@ class HolidayCardProcessor : NSObject
     //
     enum ContactPreviewType:Int
     {
+        case Unknown    = -1
         case Preview    = 0
         case Error      = 1
     }
