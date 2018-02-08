@@ -1,5 +1,5 @@
 //
-//  DataContertViewController.swift
+//  DataContentViewController.swift
 //  HolidayCard
 //
 //  Created by Michael Price on 1/14/18.
@@ -12,7 +12,7 @@ import Contacts
 //
 // @desc: Controller for the data content view
 //
-class DataContertViewController: NSViewController
+class DataContentViewController: NSViewController
 {
     // MARK: Constants, Enumerations, & Structures.
     //
@@ -746,9 +746,9 @@ class DataContertViewController: NSViewController
         get
         {
             // Specify the default value of the contact count display.
-            var defaultDisplay:String = DataContertViewController.MATCHING_CONTACT_COUNT_TEMPLATE
-            defaultDisplay = defaultDisplay.replacingOccurrences(of: DataContertViewController.CONTACT_COUNT_FILTERED, with: DataContertViewController.CONTACT_COUNT_UNKNOWN, options: .literal, range: nil)
-            defaultDisplay = defaultDisplay.replacingOccurrences(of: DataContertViewController.CONTACT_COUNT_TOTAL, with: DataContertViewController.CONTACT_COUNT_UNKNOWN, options: .literal, range: nil)
+            var defaultDisplay:String = DataContentViewController.MATCHING_CONTACT_COUNT_TEMPLATE
+            defaultDisplay = defaultDisplay.replacingOccurrences(of: DataContentViewController.CONTACT_COUNT_FILTERED, with: DataContentViewController.CONTACT_COUNT_UNKNOWN, options: .literal, range: nil)
+            defaultDisplay = defaultDisplay.replacingOccurrences(of: DataContentViewController.CONTACT_COUNT_TOTAL, with: DataContentViewController.CONTACT_COUNT_UNKNOWN, options: .literal, range: nil)
 
             return defaultDisplay
         }
@@ -768,8 +768,8 @@ class DataContertViewController: NSViewController
         get
         {
             // Specify the default value of the contact count display.
-            var defaultDisplay:String = DataContertViewController.AFFECTED_CONTACT_COUNT_TEMPLATE
-            defaultDisplay = defaultDisplay.replacingOccurrences(of: DataContertViewController.CONTACT_COUNT_TOTAL, with: DataContertViewController.CONTACT_COUNT_UNKNOWN, options: .literal, range: nil)
+            var defaultDisplay:String = DataContentViewController.AFFECTED_CONTACT_COUNT_TEMPLATE
+            defaultDisplay = defaultDisplay.replacingOccurrences(of: DataContentViewController.CONTACT_COUNT_TOTAL, with: DataContentViewController.CONTACT_COUNT_UNKNOWN, options: .literal, range: nil)
             
             return defaultDisplay
         }
@@ -843,14 +843,14 @@ class DataContertViewController: NSViewController
                     self._contactCounts.destTotal       = destCounts.totalContacts
                     
                     // Update the contact counts for the source.
-                    var workerLabel:String = DataContertViewController.MATCHING_CONTACT_COUNT_TEMPLATE
-                    workerLabel = workerLabel.replacingOccurrences(of: DataContertViewController.CONTACT_COUNT_FILTERED, with: String(self._contactCounts.sourceFiltered), options: .literal, range: nil)
-                    workerLabel = workerLabel.replacingOccurrences(of: DataContertViewController.CONTACT_COUNT_TOTAL, with: String(self._contactCounts.sourceTotal), options: .literal, range: nil)
+                    var workerLabel:String = DataContentViewController.MATCHING_CONTACT_COUNT_TEMPLATE
+                    workerLabel = workerLabel.replacingOccurrences(of: DataContentViewController.CONTACT_COUNT_FILTERED, with: String(self._contactCounts.sourceFiltered), options: .literal, range: nil)
+                    workerLabel = workerLabel.replacingOccurrences(of: DataContentViewController.CONTACT_COUNT_TOTAL, with: String(self._contactCounts.sourceTotal), options: .literal, range: nil)
                     self._lblMatchingContactCountSource.stringValue = workerLabel
                     
                     // Update the contact counts for the destination.
-                    workerLabel = DataContertViewController.AFFECTED_CONTACT_COUNT_TEMPLATE
-                    workerLabel = workerLabel.replacingOccurrences(of: DataContertViewController.CONTACT_COUNT_TOTAL, with: String(self._contactCounts.destTotal), options: .literal, range: nil)
+                    workerLabel = DataContentViewController.AFFECTED_CONTACT_COUNT_TEMPLATE
+                    workerLabel = workerLabel.replacingOccurrences(of: DataContentViewController.CONTACT_COUNT_TOTAL, with: String(self._contactCounts.destTotal), options: .literal, range: nil)
                     self._lblAffectedContactCountDest.stringValue = workerLabel
 
                     // Post a notification to update the enabled state of the UI

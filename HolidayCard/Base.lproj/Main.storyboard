@@ -564,7 +564,7 @@
         <!--DataContent-->
         <scene sceneID="DdQ-RF-cjR">
             <objects>
-                <viewController title="DataContent" id="bD2-fc-fam" customClass="DataContertViewController" customModule="HolidayCard" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController title="DataContent" id="bD2-fc-fam" customClass="DataContentViewController" customModule="HolidayCard" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" id="cHV-fe-lom">
                         <rect key="frame" x="0.0" y="0.0" width="360" height="300"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -841,7 +841,7 @@
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                 <clipView key="contentView" ambiguous="YES" id="AzR-ar-Ula">
                                     <rect key="frame" x="1" y="0.0" width="408" height="259"/>
-                                    <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                                    <autoresizingMask key="autoresizingMask"/>
                                     <subviews>
                                         <tableView verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnAutoresizingStyle="lastColumnOnly" columnSelection="YES" multipleSelection="NO" autosaveColumns="NO" rowSizeStyle="automatic" headerView="E37-y6-rQH" viewBased="YES" id="mbu-uw-1ta">
                                             <rect key="frame" x="0.0" y="0.0" width="408" height="236"/>
