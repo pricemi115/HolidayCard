@@ -15,6 +15,7 @@
 		566121961FEDE91300CB66D3 /* HolidayCardTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 566121951FEDE91300CB66D3 /* HolidayCardTests.swift */; };
 		566121A11FEDE91300CB66D3 /* HolidayCardUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 566121A01FEDE91300CB66D3 /* HolidayCardUITests.swift */; };
 		566121AF1FEF385B00CB66D3 /* HolidayCardProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 566121AE1FEF385B00CB66D3 /* HolidayCardProcessor.swift */; };
+		5680F370202BDAC6002226A3 /* MailingListPreviewViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5680F36F202BDAC6002226A3 /* MailingListPreviewViewController.swift */; };
 		56CFAFBF1FFB216F00858D18 /* license.txt in Resources */ = {isa = PBXBuildFile; fileRef = 56CFAFBE1FFB216E00858D18 /* license.txt */; };
 		56ED628D200BE9AD00659FAF /* SideBarViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 56ED628C200BE9AD00659FAF /* SideBarViewController.swift */; };
 		56ED628F200BE9D400659FAF /* DataContentViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 56ED628E200BE9D400659FAF /* DataContentViewController.swift */; };
@@ -53,6 +54,7 @@
 		566121A01FEDE91300CB66D3 /* HolidayCardUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HolidayCardUITests.swift; sourceTree = "<group>"; };
 		566121A21FEDE91300CB66D3 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		566121AE1FEF385B00CB66D3 /* HolidayCardProcessor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HolidayCardProcessor.swift; sourceTree = "<group>"; };
+		5680F36F202BDAC6002226A3 /* MailingListPreviewViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MailingListPreviewViewController.swift; sourceTree = "<group>"; };
 		56CFAFBE1FFB216E00858D18 /* license.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = license.txt; sourceTree = "<group>"; };
 		56CFAFC01FFB219A00858D18 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; name = README.md; path = "/Volumes/GrumpyData/OSX Users/pricemi/Documents/SourceCode/XCode/OSX/HolidayCard/HolidayCard/README.md"; sourceTree = "<absolute>"; };
 		56ED628C200BE9AD00659FAF /* SideBarViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SideBarViewController.swift; sourceTree = "<group>"; };
@@ -119,6 +121,7 @@
 				5660042B2001C231005B4781 /* HolidayCardErrors.swift */,
 				56ED628C200BE9AD00659FAF /* SideBarViewController.swift */,
 				56ED628E200BE9D400659FAF /* DataContentViewController.swift */,
+				5680F36F202BDAC6002226A3 /* MailingListPreviewViewController.swift */,
 			);
 			path = HolidayCard;
 			sourceTree = "<group>";
@@ -302,6 +305,7 @@
 				566121831FEDE91300CB66D3 /* AppDelegate.swift in Sources */,
 				5660042C2001C231005B4781 /* HolidayCardErrors.swift in Sources */,
 				5660042A2001ADC5005B4781 /* NotificationExtensions.swift in Sources */,
+				5680F370202BDAC6002226A3 /* MailingListPreviewViewController.swift in Sources */,
 				566121AF1FEF385B00CB66D3 /* HolidayCardProcessor.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

@@ -844,7 +844,7 @@ class HolidayCardProcessor : NSObject
                     contactPredicates.append(pred)
                 }
             }
-        catch let error
+            catch let error
             {
                 // Get the stack trace
                 var stackTrace:String = "Stack Trace:"

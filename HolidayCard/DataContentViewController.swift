@@ -137,7 +137,7 @@ class DataContentViewController: NSViewController
     // MARK: end Class overrides
     
     // MARK: Public Methods
-    // MARK: end Publix Methods
+    // MARK: end Public Methods
     
     // MARK: Action Handlers
     //
@@ -415,6 +415,10 @@ class DataContentViewController: NSViewController
                 // Post a notification to update the enabled state of the UI
                 let enableUI:Notification = Notification(name: Notification.Name.HCEnableUserInterface, object: self, userInfo: nil)
                 NotificationCenter.default.post(enableUI)
+                
+                // Post anotification to the Mailing List Preview VC that the data are ready
+                let previewData:Notification = Notification(name: Notification.Name.HCPreviewDataReady, object: self, userInfo: nil)
+                NotificationCenter.default.post(previewData)
             }
         }
     }

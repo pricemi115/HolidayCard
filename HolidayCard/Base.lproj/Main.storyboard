@@ -828,10 +828,10 @@
             </objects>
             <point key="canvasLocation" x="660" y="916"/>
         </scene>
-        <!--View Controller-->
+        <!--Mailing List Preview View Controller-->
         <scene sceneID="82v-Xw-Vcg">
             <objects>
-                <viewController id="xX1-Xj-IzP" sceneMemberID="viewController">
+                <viewController id="xX1-Xj-IzP" customClass="MailingListPreviewViewController" customModule="HolidayCard" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" id="zla-Dm-XMl">
                         <rect key="frame" x="0.0" y="0.0" width="450" height="300"/>
                         <autoresizingMask key="autoresizingMask"/>
@@ -841,7 +841,7 @@
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                 <clipView key="contentView" ambiguous="YES" id="AzR-ar-Ula">
                                     <rect key="frame" x="1" y="0.0" width="408" height="259"/>
-                                    <autoresizingMask key="autoresizingMask"/>
+                                    <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                     <subviews>
                                         <tableView verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnAutoresizingStyle="lastColumnOnly" columnSelection="YES" multipleSelection="NO" autosaveColumns="NO" rowSizeStyle="automatic" headerView="E37-y6-rQH" viewBased="YES" id="mbu-uw-1ta">
                                             <rect key="frame" x="0.0" y="0.0" width="408" height="236"/>
