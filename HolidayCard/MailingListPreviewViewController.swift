@@ -44,7 +44,7 @@ class MailingListPreviewViewController: NSViewController
         
         // Register for the notification events.
         let nc = NotificationCenter.default
-        nc.addObserver(self, selector: #selector(UpdateUI), name: Notification.Name.HCPreviewDataReady, object: nil)
+        nc.addObserver(self, selector: #selector(UpdateUI(notification:)), name: Notification.Name.HCPreviewDataReady, object: nil)
     }
 
     override func viewWillAppear()
@@ -103,24 +103,59 @@ class MailingListPreviewViewController: NSViewController
     //
     // @desc:   Helper to Update the UI and show the mailing list preview
     //
-    // @param:  None
+    // @param:  notification:   Variable data passed to the notification handler to specify the preview data.
     //
     // @return: None
     //
     // @remarks:Invoked via NotificationCenter event raised from the AppDelegate.
     //
-    @objc fileprivate func UpdateUI() -> Void
+    @objc fileprivate func UpdateUI(notification:NSNotification) -> Void
     {
-        if (self.view.window != nil)
+        // Get the new mode.
+        let data:[HolidayCardProcessor.ContactInfo]? = notification.userInfo?["data"] as? [HolidayCardProcessor.ContactInfo]
+        
+        if ((data != nil) &&
+            ((data?.count)! > 0))
         {
-            // Get the current window frame
-            var frame:NSRect = (self.view.window?.frame)!
-            // Make ourselves normal again.
-            frame = CGRect(origin: frame.origin, size: _frameSize)
-            self.view.window?.setFrame(frame, display: true)
+            // TODO: Update table.
             
-            // Update the window title
-            self.view.window?.title = PreviewTypeDesc
+            // DEBUG: Just print the results.
+            print("Printing \(PreviewTypeDesc)...Begin")
+            for item:HolidayCardProcessor.ContactInfo in data!
+            {
+                print("CN:\(item.contactName) MN:\(item.mailingName) MA:\(item.mailingAddr)")
+            }
+            print("Printing \(PreviewTypeDesc)...Done")
+            
+            if (self.view.window != nil)
+            {
+                // Get the current window frame
+                var frame:NSRect = (self.view.window?.frame)!
+                // Make ourselves normal again.
+                frame = CGRect(origin: frame.origin, size: _frameSize)
+                self.view.window?.setFrame(frame, display: true)
+                
+                // Update the window title
+                self.view.window?.title = PreviewTypeDesc
+            }
+        }
+        else
+        {
+            if (self.view.window != nil)
+            {
+                // Notify the user that there is no data to be previewed.
+                let errDesc:String = "There is no data available for the preview."
+                let errData:HolidayCardError = HolidayCardError(err: errDesc, stack: String(), style: HolidayCardError.Style.Informational)
+                
+                // Post the error for reporting.
+                let err:[String:HolidayCardError] = ["error":errData]
+                let nc:NotificationCenter = NotificationCenter.default
+                nc.post(name: Notification.Name.HCHolidayCardError, object: nil, userInfo: err)
+
+                
+                // There is nothing else for us to do.
+                self.view.window?.close()
+            }
         }
     }
     

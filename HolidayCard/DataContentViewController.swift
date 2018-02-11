@@ -100,7 +100,7 @@ class DataContentViewController: NSViewController
         // Register for the "PermissionGranted" event.
         nc.addObserver(self, selector: #selector(InitializeUI), name: Notification.Name.CNPermissionGranted, object: nil)
         nc.addObserver(self, selector: #selector(EnableUI), name: Notification.Name.HCEnableUserInterface, object: nil)
-        nc.addObserver(self, selector: #selector(ModeChange(_:)), name: Notification.Name.HCModeChange, object: nil)
+        nc.addObserver(self, selector: #selector(ModeChange(notification:)), name: Notification.Name.HCModeChange, object: nil)
         nc.addObserver(self, selector: #selector(UpdateContactCounts), name: Notification.Name.HCUpdateContactCounts, object: nil)
     }
     
@@ -403,15 +403,7 @@ class DataContentViewController: NSViewController
             
             // Wait until the background operation finishes.
             DispatchQueue.main.async
-            {
-                // DEBUG: Just print the results.
-                print("Printing \(viewType)...Begin")
-                for item:HolidayCardProcessor.ContactInfo in mailingListPreview
-                {
-                    print("CN:\(item.contactName) MN:\(item.mailingName) MA:\(item.mailingAddr)")
-                }
-                print("Printing \(viewType)...Done")
-                
+            {                
                 // Post a notification to update the enabled state of the UI
                 let enableUI:Notification = Notification(name: Notification.Name.HCEnableUserInterface, object: self, userInfo: nil)
                 NotificationCenter.default.post(enableUI)
@@ -636,13 +628,13 @@ class DataContentViewController: NSViewController
     //
     // @desc:   Helper to react to mode changes.
     //
-    // @param:  None
+    // @param:  notification:   Variable data passed to the notification handler to indicate the new mode.
     //
     // @return: None
     //
     // @remarks:Invoked via NotificationCenter event raised from the SideBar ViewController.
     //
-    @objc fileprivate func ModeChange(_ notification:NSNotification) -> Void
+    @objc fileprivate func ModeChange(notification:NSNotification) -> Void
     {
         // Get the new mode.
         let mode:SideBarViewController.SIDEBAR_MODE? = notification.userInfo?["mode"] as? SideBarViewController.SIDEBAR_MODE
