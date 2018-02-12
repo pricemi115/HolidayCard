@@ -128,6 +128,13 @@ class DataContentViewController: NSViewController
             previewType = HolidayCardProcessor.ContactPreviewType.Error
         }
         
+        // Configure the Mailing List view controller.
+        let vc:MailingListPreviewViewController? = segue.destinationController as? MailingListPreviewViewController
+        if (vc != nil)
+        {
+            vc?.PreviewType = previewType
+        }
+        
         // Generate the preview data.
         // Note: This call will be performed on a background thread and should not be blocked.
         //       When the background task completes, the view controler will be notified of the
@@ -408,9 +415,10 @@ class DataContentViewController: NSViewController
                 let enableUI:Notification = Notification(name: Notification.Name.HCEnableUserInterface, object: self, userInfo: nil)
                 NotificationCenter.default.post(enableUI)
                 
-                // Post anotification to the Mailing List Preview VC that the data are ready
-                let previewData:Notification = Notification(name: Notification.Name.HCPreviewDataReady, object: self, userInfo: nil)
-                NotificationCenter.default.post(previewData)
+                // Update the preview view controller with the payload
+                let data:[String:[HolidayCardProcessor.ContactInfo]] = [NotificationPayloadKeys.data.rawValue:mailingListPreview]
+                let nc:NotificationCenter = NotificationCenter.default
+                nc.post(name: Notification.Name.HCPreviewDataReady, object: nil, userInfo: data)
             }
         }
     }

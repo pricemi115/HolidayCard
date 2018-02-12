@@ -156,7 +156,7 @@ class AppDelegate: NSObject, NSApplicationDelegate
             let errData:HolidayCardError = HolidayCardError(err: errDesc, stack: stackTrace, style: HolidayCardError.Style.Warning)
             
             // Post the error for reporting.
-            let err:[String:HolidayCardError] = ["error":errData]
+            let err:[String:HolidayCardError] = [NotificationPayloadKeys.error.rawValue:errData]
             let nc:NotificationCenter = NotificationCenter.default
             nc.post(name: Notification.Name.HCHolidayCardError, object: nil, userInfo: err)
         }
@@ -176,7 +176,7 @@ class AppDelegate: NSObject, NSApplicationDelegate
     @objc func showError(_ notification:NSNotification) -> Void
     {
         // Get the error
-        let error:HolidayCardError? = notification.userInfo?["error"] as? HolidayCardError
+        let error:HolidayCardError? = notification.userInfo?[NotificationPayloadKeys.error.rawValue] as? HolidayCardError
         
         if (error != nil)
         {

@@ -168,7 +168,7 @@ class HolidayCardProcessor : NSObject
                 let errData:HolidayCardError = HolidayCardError(err: errDesc, stack: stackTrace, style: HolidayCardError.Style.Critical)
                 
                 // Post the error for reporting.
-                let err:[String:HolidayCardError] = ["error":errData]
+                let err:[String:HolidayCardError] = [NotificationPayloadKeys.error.rawValue:errData]
                 let nc:NotificationCenter = NotificationCenter.default
                 nc.post(name: Notification.Name.HCHolidayCardError, object: nil, userInfo: err)
             }
@@ -184,7 +184,7 @@ class HolidayCardProcessor : NSObject
             let errData:HolidayCardError = HolidayCardError(err: errDesc, stack: stackTrace, style: HolidayCardError.Style.Critical)
             
             // Post the error for reporting.
-            let err:[String:HolidayCardError] = ["error":errData]
+            let err:[String:HolidayCardError] = [NotificationPayloadKeys.error.rawValue:errData]
             let nc:NotificationCenter = NotificationCenter.default
             nc.post(name: Notification.Name.HCHolidayCardError, object: nil, userInfo: err)
         }
@@ -252,7 +252,7 @@ class HolidayCardProcessor : NSObject
             let errData:HolidayCardError = HolidayCardError(err: errDesc, stack: stackTrace, style: HolidayCardError.Style.Critical)
             
             // Post the error for reporting.
-            let err:[String:HolidayCardError] = ["error":errData]
+            let err:[String:HolidayCardError] = [NotificationPayloadKeys.error.rawValue:errData]
             let nc:NotificationCenter = NotificationCenter.default
             nc.post(name: Notification.Name.HCHolidayCardError, object: nil, userInfo: err)
             
@@ -334,7 +334,7 @@ class HolidayCardProcessor : NSObject
             let errData:HolidayCardError = HolidayCardError(err: errDesc, stack: String(), style: HolidayCardError.Style.Informational)
             
             // Post the error for reporting.
-            let err:[String:HolidayCardError] = ["error":errData]
+            let err:[String:HolidayCardError] = [NotificationPayloadKeys.error.rawValue:errData]
             let nc:NotificationCenter = NotificationCenter.default
             nc.post(name: Notification.Name.HCHolidayCardError, object: nil, userInfo: err)
             
@@ -348,7 +348,7 @@ class HolidayCardProcessor : NSObject
             let errData:HolidayCardError = HolidayCardError(err: errDesc, stack: String(), style: HolidayCardError.Style.Informational)
             
             // Post the error for reporting.
-            let err:[String:HolidayCardError] = ["error":errData]
+            let err:[String:HolidayCardError] = [NotificationPayloadKeys.error.rawValue:errData]
             let nc:NotificationCenter = NotificationCenter.default
             nc.post(name: Notification.Name.HCHolidayCardError, object: nil, userInfo: err)
             
@@ -362,7 +362,7 @@ class HolidayCardProcessor : NSObject
             let errData:HolidayCardError = HolidayCardError(err: errDesc, stack: String(), style: HolidayCardError.Style.Informational)
             
             // Post the error for reporting.
-            let err:[String:HolidayCardError] = ["error":errData]
+            let err:[String:HolidayCardError] = [NotificationPayloadKeys.error.rawValue:errData]
             let nc:NotificationCenter = NotificationCenter.default
             nc.post(name: Notification.Name.HCHolidayCardError, object: nil, userInfo: err)
             
@@ -377,7 +377,7 @@ class HolidayCardProcessor : NSObject
             let errData:HolidayCardError = HolidayCardError(err: errDesc, stack: String(), style: HolidayCardError.Style.Informational)
             
             // Post the error for reporting.
-            let err:[String:HolidayCardError] = ["error":errData]
+            let err:[String:HolidayCardError] = [NotificationPayloadKeys.error.rawValue:errData]
             let nc:NotificationCenter = NotificationCenter.default
             nc.post(name: Notification.Name.HCHolidayCardError, object: nil, userInfo: err)
             
@@ -396,7 +396,7 @@ class HolidayCardProcessor : NSObject
                 let errData:HolidayCardError = HolidayCardError(err: errDesc, stack: String(), style: HolidayCardError.Style.Informational)
                 
                 // Post the error for reporting.
-                let err:[String:HolidayCardError] = ["error":errData]
+                let err:[String:HolidayCardError] = [NotificationPayloadKeys.error.rawValue:errData]
                 let nc:NotificationCenter = NotificationCenter.default
                 nc.post(name: Notification.Name.HCHolidayCardError, object: nil, userInfo: err)
                 return
@@ -415,7 +415,7 @@ class HolidayCardProcessor : NSObject
             let errData:HolidayCardError = HolidayCardError(err: errDesc, stack: stackTrace, style: HolidayCardError.Style.Critical)
             
             // Post the error for reporting.
-            let err:[String:HolidayCardError] = ["error":errData]
+            let err:[String:HolidayCardError] = [NotificationPayloadKeys.error.rawValue:errData]
             let nc:NotificationCenter = NotificationCenter.default
             nc.post(name: Notification.Name.HCHolidayCardError, object: nil, userInfo: err)
         }
@@ -434,7 +434,7 @@ class HolidayCardProcessor : NSObject
                 let errData:HolidayCardError = HolidayCardError(err: errDesc, stack: String(), style: HolidayCardError.Style.Informational)
                 
                 // Post the error for reporting.
-                let err:[String:HolidayCardError] = ["error":errData]
+                let err:[String:HolidayCardError] = [NotificationPayloadKeys.error.rawValue:errData]
                 let nc:NotificationCenter = NotificationCenter.default
                 nc.post(name: Notification.Name.HCHolidayCardError, object: nil, userInfo: err)
                 return
@@ -453,7 +453,7 @@ class HolidayCardProcessor : NSObject
             let errData:HolidayCardError = HolidayCardError(err: errDesc, stack: stackTrace, style: HolidayCardError.Style.Critical)
             
             // Post the error for reporting.
-            let err:[String:HolidayCardError] = ["error":errData]
+            let err:[String:HolidayCardError] = [NotificationPayloadKeys.error.rawValue:errData]
             let nc:NotificationCenter = NotificationCenter.default
             nc.post(name: Notification.Name.HCHolidayCardError, object: nil, userInfo: err)
         }
@@ -483,7 +483,7 @@ class HolidayCardProcessor : NSObject
             let errData:HolidayCardError = HolidayCardError(err: errDesc, stack: stackTrace, style: HolidayCardError.Style.Critical)
             
             // Post the error for reporting.
-            let err:[String:HolidayCardError] = ["error":errData]
+            let err:[String:HolidayCardError] = [NotificationPayloadKeys.error.rawValue:errData]
             let nc:NotificationCenter = NotificationCenter.default
             nc.post(name: Notification.Name.HCHolidayCardError, object: nil, userInfo: err)
         }
@@ -676,7 +676,7 @@ class HolidayCardProcessor : NSObject
                 let errData:HolidayCardError = HolidayCardError(err: errDesc, stack: stackTrace, style: HolidayCardError.Style.Critical)
                 
                 // Post the error for reporting.
-                let err:[String:HolidayCardError] = ["error":errData]
+                let err:[String:HolidayCardError] = [NotificationPayloadKeys.error.rawValue:errData]
                 let nc:NotificationCenter = NotificationCenter.default
                 nc.post(name: Notification.Name.HCHolidayCardError, object: nil, userInfo: err)
             }
@@ -854,7 +854,7 @@ class HolidayCardProcessor : NSObject
                 let errData:HolidayCardError = HolidayCardError(err: errDesc, stack: stackTrace, style: HolidayCardError.Style.Critical)
                 
                 // Post the error for reporting.
-                let err:[String:HolidayCardError] = ["error":errData]
+                let err:[String:HolidayCardError] = [NotificationPayloadKeys.error.rawValue:errData]
                 let nc:NotificationCenter = NotificationCenter.default
                 nc.post(name: Notification.Name.HCHolidayCardError, object: nil, userInfo: err)
             }
@@ -896,7 +896,7 @@ class HolidayCardProcessor : NSObject
                 let errData:HolidayCardError = HolidayCardError(err: errDesc, stack: stackTrace, style: HolidayCardError.Style.Critical)
                 
                 // Post the error for reporting.
-                let err:[String:HolidayCardError] = ["error":errData]
+                let err:[String:HolidayCardError] = [NotificationPayloadKeys.error.rawValue:errData]
                 let nc:NotificationCenter = NotificationCenter.default
                 nc.post(name: Notification.Name.HCHolidayCardError, object: nil, userInfo: err)
             }
@@ -954,7 +954,7 @@ class HolidayCardProcessor : NSObject
                 let errData:HolidayCardError = HolidayCardError(err: errDesc, stack: stackTrace, style: HolidayCardError.Style.Critical)
                 
                 // Post the error for reporting.
-                let err:[String:HolidayCardError] = ["error":errData]
+                let err:[String:HolidayCardError] = [NotificationPayloadKeys.error.rawValue:errData]
                 let nc:NotificationCenter = NotificationCenter.default
                 nc.post(name: Notification.Name.HCHolidayCardError, object: nil, userInfo: err)
             }

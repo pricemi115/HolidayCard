@@ -112,7 +112,7 @@ class MailingListPreviewViewController: NSViewController
     @objc fileprivate func UpdateUI(notification:NSNotification) -> Void
     {
         // Get the new mode.
-        let data:[HolidayCardProcessor.ContactInfo]? = notification.userInfo?["data"] as? [HolidayCardProcessor.ContactInfo]
+        let data:[HolidayCardProcessor.ContactInfo]? = notification.userInfo?[NotificationPayloadKeys.data.rawValue] as? [HolidayCardProcessor.ContactInfo]
         
         if ((data != nil) &&
             ((data?.count)! > 0))
@@ -148,7 +148,7 @@ class MailingListPreviewViewController: NSViewController
                 let errData:HolidayCardError = HolidayCardError(err: errDesc, stack: String(), style: HolidayCardError.Style.Informational)
                 
                 // Post the error for reporting.
-                let err:[String:HolidayCardError] = ["error":errData]
+                let err:[String:HolidayCardError] = [NotificationPayloadKeys.error.rawValue:errData]
                 let nc:NotificationCenter = NotificationCenter.default
                 nc.post(name: Notification.Name.HCHolidayCardError, object: nil, userInfo: err)
 
