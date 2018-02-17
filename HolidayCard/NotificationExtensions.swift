@@ -20,4 +20,14 @@ extension Notification.Name
     static let HCEnableUserInterface    = Notification.Name("HCEnableUserInterface")
     static let HCModeChange             = Notification.Name("HCModeChange")
     static let HCUpdateContactCounts    = Notification.Name("HCUpdateContactCounts")
+    static let HCPreviewDataReady       = Notification.Name("HCPreviewDataReady")
+}
+
+//
+// @desc: Enumeration for keys used for passing payload data along with notifications.
+//
+enum NotificationPayloadKeys:String
+{
+    case error  = "error"
+    case data   = "data"
 }
