@@ -17,12 +17,19 @@ class MailingListPreviewViewController: NSViewController
     // MARK: end Constants, Enumerations, & Structures
     
     // MARK: Properties
+    @IBOutlet fileprivate var _tableView: NSTableView!
+    @IBOutlet fileprivate weak var _constraintTrail: NSLayoutConstraint!
+    @IBOutlet fileprivate weak var _constraintTop: NSLayoutConstraint!
+    @IBOutlet fileprivate weak var _constraintBottom: NSLayoutConstraint!
+    @IBOutlet fileprivate weak var _constraintLead: NSLayoutConstraint!
     // MARK: end Properties
     
     // MARK: Data Members
     //
     // @desc: Cached frame size used to restore the window to its original size when the data are ready.
     fileprivate var _frameSize:CGSize = CGSize()
+    fileprivate var _myConstraints:[NSLayoutConstraint] = [NSLayoutConstraint]()
+    fileprivate var _dataSource:[HolidayCardProcessor.ContactInfo] = [HolidayCardProcessor.ContactInfo]()
     //
     // @desc: Preview Type
     fileprivate var _previewType:HolidayCardProcessor.ContactPreviewType = HolidayCardProcessor.ContactPreviewType.Unknown
@@ -45,8 +52,24 @@ class MailingListPreviewViewController: NSViewController
         // Register for the notification events.
         let nc = NotificationCenter.default
         nc.addObserver(self, selector: #selector(UpdateUI(notification:)), name: Notification.Name.HCPreviewDataReady, object: nil)
+        
+        // Cache our constraints of interest, so that they do not
+        // get in the way when "hiding" the window during load.
+        _myConstraints.append(_constraintTrail)
+        _myConstraints.append(_constraintTop)
+        _myConstraints.append(_constraintBottom)
+        _myConstraints.append(_constraintLead)
     }
 
+    //
+    // @desc:   Class override for showing the view
+    //
+    // @param:  None
+    //
+    // @return: None
+    //
+    // @remarks:None
+    //
     override func viewWillAppear()
     {
         super.viewWillAppear()
@@ -58,6 +81,12 @@ class MailingListPreviewViewController: NSViewController
         // We will show ourself when we have data to display
         if (self.view.window != nil)
         {
+            // Deactivate the constraints so that we can completely hide the window.
+            for constraint:NSLayoutConstraint in _myConstraints
+            {
+                constraint.isActive = false
+            }
+            
             // Get the current window frame
             var frame:NSRect = (self.view.window?.frame)!
             // Cache the frame size for restoration later.
@@ -117,16 +146,11 @@ class MailingListPreviewViewController: NSViewController
         if ((data != nil) &&
             ((data?.count)! > 0))
         {
-            // TODO: Update table.
+            // Cache the data.
+            _dataSource = data!
             
-            // DEBUG: Just print the results.
-            print("Printing \(PreviewTypeDesc)...Begin")
-            for item:HolidayCardProcessor.ContactInfo in data!
-            {
-                print("CN:\(item.contactName) MN:\(item.mailingName) MA:\(item.mailingAddr)")
-            }
-            print("Printing \(PreviewTypeDesc)...Done")
-            
+            // Show our window. re-establish our constraints,
+            // and initiate the data reload
             if (self.view.window != nil)
             {
                 // Get the current window frame
@@ -135,8 +159,17 @@ class MailingListPreviewViewController: NSViewController
                 frame = CGRect(origin: frame.origin, size: _frameSize)
                 self.view.window?.setFrame(frame, display: true)
                 
+                // Reactivate the constraints so that the display works properly
+                for constraint:NSLayoutConstraint in _myConstraints
+                {
+                    constraint.isActive = true
+                }
+                
                 // Update the window title
                 self.view.window?.title = PreviewTypeDesc
+                
+                // Load the table data.
+                _tableView.reloadData()
             }
         }
         else
@@ -152,7 +185,6 @@ class MailingListPreviewViewController: NSViewController
                 let nc:NotificationCenter = NotificationCenter.default
                 nc.post(name: Notification.Name.HCHolidayCardError, object: nil, userInfo: err)
 
-                
                 // There is nothing else for us to do.
                 self.view.window?.close()
             }
@@ -194,4 +226,102 @@ class MailingListPreviewViewController: NSViewController
         }
     }
     // MARK: end Private helper methods
+}
+
+//
+// @desc: Extension for the Table View Data Source interface.
+//
+extension MailingListPreviewViewController: NSTableViewDataSource
+{
+    //
+    // @desc:   Specifies the number of rows with data entries
+    //
+    // @param:  tableView:  Table being querried
+    //
+    // @return: Number of rows
+    //
+    // @remarks:None
+    //
+    func numberOfRows(in tableView: NSTableView) -> Int
+    {
+        var rows:Int = 0
+        
+        if (tableView == _tableView)
+        {
+            rows = _dataSource.count
+        }
+        
+        return rows
+    }
+}
+
+//
+// @desc: Extension for the Table View Delegate interface.
+//
+extension MailingListPreviewViewController: NSTableViewDelegate
+{
+    // MARK: Constants and Enumerations
+    //
+    // @desc: Constants for the column identifiers. Set in the Storyboard.
+    //
+    fileprivate enum ColumnIdentifiers
+    {
+        static let ContactName      = "colId_ContactName"
+        static let MailingName      = "colId_MailingName"
+        static let MailingAddress   = "colId_MailingAddress"
+    }
+    // MARK: end Constants and Enumerations
+    
+    // MARK: Table View Delegate Implementation.
+    //
+    // @desc:   Handler providng the value for each cell
+    //
+    // @param:  tableView:      Table being querried
+    // @param:  tableColumn:    Column being updated
+    // @param:  row:            Row being updated
+    //
+    // @return: NSView cell value
+    //
+    // @remarks:None
+    //
+    func tableView(_ tableView: NSTableView, viewFor tableColumn: NSTableColumn?, row: Int) -> NSView?
+    {
+        var cellValue: String = ""
+        var columnId: String = ""
+        
+        // Determine which column this is.
+        columnId = (tableColumn?.identifier)!.rawValue
+        
+        // Get the data for this request
+        let cellDataSource:HolidayCardProcessor.ContactInfo = _dataSource[row]
+        
+        // Determine the actual data for this cell
+        switch (columnId)
+        {
+        case ColumnIdentifiers.ContactName:
+            cellValue = cellDataSource.contactName
+            break
+            
+        case ColumnIdentifiers.MailingName:
+            cellValue = cellDataSource.mailingName
+            break
+            
+        case ColumnIdentifiers.MailingAddress:
+            cellValue = cellDataSource.mailingAddr
+            break
+            
+        default:
+            // Error. Unknown column
+            cellValue = "Unknown column"
+        }
+        
+        // Create a cell and populate.
+        let cell:NSTableCellView? = tableView.makeView(withIdentifier: NSUserInterfaceItemIdentifier(rawValue: columnId), owner: nil) as? NSTableCellView
+        if (cell != nil)
+        {
+            cell?.textField?.stringValue = cellValue
+        }
+        
+        return cell
+    }
 }
