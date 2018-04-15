@@ -24,6 +24,14 @@ class DataContentViewController: NSViewController
     fileprivate static let MATCHING_CONTACT_COUNT_TEMPLATE:String   = CONTACT_COUNT_FILTERED + " of " + CONTACT_COUNT_TOTAL
     fileprivate static let AFFECTED_CONTACT_COUNT_TEMPLATE:String   = CONTACT_COUNT_TOTAL
     //
+    // @desc: Persistence Identification Strings.
+    //
+    fileprivate let PERSISTENCE_KEY_SOURCE_GROUP:String         = "Source.GroupId"
+    fileprivate let PERSISTENCE_KEY_SOURCE_RELATION:String      = "Source.RelationId"
+    fileprivate let PERSISTENCE_KEY_SOURCE_ADDRESS:String       = "Source.AddressId"
+    fileprivate let PERSISTENCE_KEY_DESTINATION_GROUP:String    = "Destination.GroupId"
+
+    //
     // @desc: Structure for storing the currently selected menu items.
     //
     fileprivate struct SelectedItems
@@ -32,6 +40,15 @@ class DataContentViewController: NSViewController
         var destination:uint    = 0
         var postal:uint         = 0
         var relation:uint       = 0
+    }
+    //
+    // @desc: Enumeration for segue identifiers to the Mailing List Preview
+    //
+    fileprivate enum MailingListSegueIds: String
+    {
+        case segueIdPreview = "mailingPreview"
+        case segueIdError   = "mailingErrors"
+        case segueIdReset   = "destinationReset"
     }
     // MARK: end Constants, Enumerations, & Structures
     
@@ -100,6 +117,7 @@ class DataContentViewController: NSViewController
         // Register for the "PermissionGranted" event.
         nc.addObserver(self, selector: #selector(InitializeUI), name: Notification.Name.CNPermissionGranted, object: nil)
         nc.addObserver(self, selector: #selector(EnableUI), name: Notification.Name.HCEnableUserInterface, object: nil)
+        nc.addObserver(self, selector: #selector(DisableUI), name: Notification.Name.HCDisableUserInterface, object: nil)
         nc.addObserver(self, selector: #selector(ModeChange(notification:)), name: Notification.Name.HCModeChange, object: nil)
         nc.addObserver(self, selector: #selector(UpdateContactCounts), name: Notification.Name.HCUpdateContactCounts, object: nil)
     }
@@ -119,13 +137,17 @@ class DataContentViewController: NSViewController
         var previewType:HolidayCardProcessor.ContactPreviewType = HolidayCardProcessor.ContactPreviewType.Unknown
         
         // Determine the preview type based on the segue being invoked.
-        if (segue.identifier == NSStoryboardSegue.Identifier(rawValue: "mailingPreview"))
+        if (segue.identifier == NSStoryboardSegue.Identifier(rawValue: MailingListSegueIds.segueIdPreview.rawValue))
         {
             previewType = HolidayCardProcessor.ContactPreviewType.Preview
         }
-        else if (segue.identifier == NSStoryboardSegue.Identifier(rawValue: "mailingErrors"))
+        else if (segue.identifier == NSStoryboardSegue.Identifier(rawValue: MailingListSegueIds.segueIdError.rawValue))
         {
             previewType = HolidayCardProcessor.ContactPreviewType.Error
+        }
+        else if (segue.identifier == NSStoryboardSegue.Identifier(rawValue: MailingListSegueIds.segueIdReset.rawValue))
+        {
+            previewType = HolidayCardProcessor.ContactPreviewType.Reset
         }
         
         // Configure the Mailing List view controller.
@@ -208,6 +230,10 @@ class DataContentViewController: NSViewController
     //
     @IBAction fileprivate func _btnResetList_doClick(_ sender: Any)
     {
+        let CONFITMATION_RESET      = NSApplication.ModalResponse.alertThirdButtonReturn
+        let CONFIRMATION_PREVIEW    = NSApplication.ModalResponse.alertSecondButtonReturn
+        let CONFIRMATION_CANCEL     = NSApplication.ModalResponse.alertFirstButtonReturn
+        
         if ((_selContactDestination.numberOfItems > 0) &&
             (_selContactDestination.selectedItem?.isEnabled)!)
         {
@@ -227,7 +253,7 @@ class DataContentViewController: NSViewController
             {
                 // Determine the nubmer of contats in the destination.
                 let contactCount = self._hcp.GetGontactCount(sourceId: groupId, addrSource: nil, relatedNameSource: nil).totalContacts
-                
+
                 // Wait until the background operation finishes.
                 DispatchQueue.main.async
                 {
@@ -240,48 +266,65 @@ class DataContentViewController: NSViewController
                     if (contactCount > 0)
                     {
                         // Ensure the user is aware of the potential consequences to their actions.
-                        // TODO: Use a subview to allow the user to see all of the contacts in the group. For now - just use an alertable message.
+                        // Construct a basic alert message.
                         let alert: NSAlert = NSAlert()
                         let name:String = self.GetNameFromMenuItem(menuItem: mnuDest)
-                        // TODO: Use string substitution for the alert message ??
-                        if (contactCount == 1)
-                        {
-                            alert.messageText = "There is \(contactCount) contact in group '\(name)' that is about to be deleted."
-                        }
-                        else
-                        {
-                            alert.messageText = "There are \(contactCount) contacts in group '\(name)' that are about to be deleted."
-                        }
+                        let verb:String = ((contactCount == 1) ? "is" : "are")
+                        let contactPlurality = ((contactCount == 1) ? "" : "s")
+                        alert.messageText = "There \(verb) \(contactCount) contact\(contactPlurality) in group '\(name)' that \(verb) about to be deleted."
                         alert.alertStyle = .warning
-                        alert.informativeText = "Are you sure you want to proceed?"
+                        alert.informativeText = "How do you wish to proceed?"
                         alert.addButton(withTitle: "Cancel")
-                        alert.addButton(withTitle: "Proceed")
+                        alert.addButton(withTitle: "Preview")
+                        alert.addButton(withTitle: "Reset")
                         // Pose the confirmation
                         let response: NSApplication.ModalResponse = alert.runModal()
-                        // Only proceed if confirmed.
-                        if (response == .alertSecondButtonReturn)
+                        // Proceed based upon the users intention
+                        switch (response)
                         {
-                            // Disable the UI again.
-                            self.DisableUI()
-                            
-                            // Perform the operation on a background thread.
-                            DispatchQueue.global(qos: .background).async
+                        case CONFITMATION_RESET, CONFIRMATION_PREVIEW:
+                            switch (response)
                             {
-                                // Flush the selected group.
-                                self._hcp.FlushAllGroupContacts(sourceId: groupId)
-                                
-                                // Wait until the background operation finishes.
-                                DispatchQueue.main.async
+                            case CONFITMATION_RESET:
+                                // Perform the operation on a background thread.
+                                DispatchQueue.global(qos: .background).async
                                 {
-                                    // Since the content of the destination group has changed, reset the counts prior to re-enabling the
-                                    // UI. This will result in the counts being re-evaluated.
-                                    self.ResetContactCounts()
+                                    // Flush the selected group.
+                                    self._hcp.FlushAllGroupContacts(sourceId: groupId)
                                     
-                                    // Post a notification to update the enabled state of the UI
-                                    let enableUI:Notification = Notification(name: Notification.Name.HCEnableUserInterface, object: self, userInfo: nil)
-                                    NotificationCenter.default.post(enableUI)
+                                    // Wait until the background operation finishes.
+                                    DispatchQueue.main.async
+                                    {
+                                        // Since the content of the destination group has changed, reset the counts prior to re-enabling the
+                                        // UI. This will result in the counts being re-evaluated.
+                                        self.ResetContactCounts()
+                                        
+                                        // Post a notification to update the enabled state of the UI
+                                        let enableUI:Notification = Notification(name: Notification.Name.HCEnableUserInterface, object: self, userInfo: nil)
+                                        NotificationCenter.default.post(enableUI)
+                                    }
                                 }
+                                break
+                                
+                            case CONFIRMATION_PREVIEW:
+                                // Issue a segue to preview the reset list
+                                let segueId: NSStoryboardSegue.Identifier = NSStoryboardSegue.Identifier(MailingListSegueIds.segueIdReset.rawValue)
+                                self.performSegue(withIdentifier: segueId, sender: self)
+                                break
+                                
+                            default:
+                                // Nothing to do
+                                break
                             }
+                            break
+                            
+                        case CONFIRMATION_CANCEL:
+                            // Nothing to do
+                            break
+                            
+                        default:
+                            // Nothing to do
+                            break
                         }
                     }
                 }
@@ -305,15 +348,19 @@ class DataContentViewController: NSViewController
         {
             // Change made.
             
+            // Persist the new selection
+            let defaults = UserDefaults.standard
+            defaults.set(GetIdentifierFromMenuItem(menuItem: _selContactSource.selectedItem!), forKey: PERSISTENCE_KEY_SOURCE_GROUP)
+            
             // Reset the contact count displays
             ResetContactCounts()
             
             // The source group has changed. Update the postal address labels.
             // @remark: This operation will be performed on a background thread. This needs to be accounted for when determining if the Generate List button should be enabled.
-            resetPostalAddressOptions()
+            resetPostalAddressOptions(selectedValue: _selPostalAddressLabels.titleOfSelectedItem)
             // The source group has changed. Update the relation name labels.
             // @remark: This operation will be performed on a background thread. This needs to be accounted for when determining if the Generate List button should be enabled.
-            resetRelationNameOptions()
+            resetRelationNameOptions(selectedValue: _selRelationLabels.titleOfSelectedItem)
         }
     }
     
@@ -331,6 +378,10 @@ class DataContentViewController: NSViewController
         // Is there a change in the selection?
         if (_selRelationLabels.selectedTag() != _selectedItems.relation)
         {
+            // Persist the new selection
+            let defaults = UserDefaults.standard
+            defaults.set(_selRelationLabels.titleOfSelectedItem, forKey: PERSISTENCE_KEY_SOURCE_RELATION)
+
             // Update the contact counts.
             ResetContactCounts()
             UpdateContactCounts()
@@ -351,6 +402,10 @@ class DataContentViewController: NSViewController
         // Is there a change in the selection?
         if (_selPostalAddressLabels.selectedTag() != _selectedItems.postal)
         {
+            // Persist the new selection
+            let defaults = UserDefaults.standard
+            defaults.set(_selPostalAddressLabels.titleOfSelectedItem, forKey: PERSISTENCE_KEY_SOURCE_ADDRESS)
+
             // Update the contact counts.
             ResetContactCounts()
             UpdateContactCounts()
@@ -371,6 +426,10 @@ class DataContentViewController: NSViewController
         // Is there a change in the selection?
         if (_selContactDestination.selectedTag() != _selectedItems.destination)
         {
+            // Persist the new selection
+            let defaults = UserDefaults.standard
+            defaults.set(GetIdentifierFromMenuItem(menuItem: _selContactDestination.selectedItem!), forKey: PERSISTENCE_KEY_DESTINATION_GROUP)
+
             // Update the contact counts.
             ResetContactCounts()
             UpdateContactCounts()
@@ -379,7 +438,8 @@ class DataContentViewController: NSViewController
     // MARK: end Action Handlers
     
     // MARK: Private helper methods
-    // @desc:   Helper to rgenerate the Preview and Errors vies
+    //
+    // @desc:   Helper to generate the view list for the Mailing List Preview and Mailing List Errors, and Destination Reset List
     //
     // @param:  None
     //
@@ -389,13 +449,19 @@ class DataContentViewController: NSViewController
     //
     fileprivate func generateView(viewType:HolidayCardProcessor.ContactPreviewType)
     {
-        // Get the menu item for the selected source item
-        let mnuItem:NSMenuItem? = _selContactSource.selectedItem
+        // Validate that we can handle the view type requested.
+        guard(viewType != HolidayCardProcessor.ContactPreviewType.Unknown) else
+        {
+            return
+        }
+        
+        // Get the menu item for the contact list requst.
+        let mnuItem:NSMenuItem? = ((HolidayCardProcessor.ContactPreviewType.Reset != viewType) ? _selContactSource.selectedItem : _selContactDestination.selectedItem)
         let sourceIdentifier:String = GetIdentifierFromMenuItem(menuItem: mnuItem)
         // Get the name of the postal address label to use for the mailing list.
-        let address:String = _selPostalAddressLabels.titleOfSelectedItem!
+        let address:String = ((HolidayCardProcessor.ContactPreviewType.Reset != viewType) ? _selPostalAddressLabels.titleOfSelectedItem! : String())
         // Get the name of the related contact label to use for the mailing list.
-        let name:String = _selRelationLabels.titleOfSelectedItem!
+        let name:String = ((HolidayCardProcessor.ContactPreviewType.Reset != viewType) ? _selRelationLabels.titleOfSelectedItem! : String())
         
         // Start by disabling the UI to prevent ui re-entrancy
         DisableUI()
@@ -424,13 +490,13 @@ class DataContentViewController: NSViewController
     }
     // @desc:   Helper to reset the UI for the Postal Address selection
     //
-    // @param:  None
+    // @param:  selectedValue - Value used to attempt to restore, if possible.
     //
     // @return: None
     //
     // @remarks:None
     //
-    fileprivate func resetPostalAddressOptions()
+    fileprivate func resetPostalAddressOptions(selectedValue:String?) -> Void
     {
         // Initialize the postal address labels
         _selPostalAddressLabels.removeAllItems()
@@ -466,6 +532,25 @@ class DataContentViewController: NSViewController
                             self._selPostalAddressLabels.lastItem?.tag = self._selPostalAddressLabels.numberOfItems
                         }
                     }
+    
+                    // Attempt to select the specified restore
+                    var value:String = String()
+                    if (selectedValue != nil)
+                    {
+                        value = selectedValue!
+                    }
+                    else
+                    {
+                        value = self._selPostalAddressLabels.itemTitle(at: 0)
+                    }
+                    if (self._selPostalAddressLabels.itemTitles.contains(value))
+                    {
+                        self._selPostalAddressLabels.selectItem(withTitle: value)
+                        
+                        // Ensure thar the selection is persisted
+                        let defaults = UserDefaults.standard
+                        defaults.set(value, forKey: self.PERSISTENCE_KEY_SOURCE_ADDRESS)
+                    }
                     
                     // Post a notification to update the enabled state of the UI
                     let enableUI:Notification = Notification(name: Notification.Name.HCEnableUserInterface, object: self, userInfo: nil)
@@ -478,13 +563,13 @@ class DataContentViewController: NSViewController
     //
     // @desc:   Helper to reset the UI for the Renation Name selection
     //
-    // @param:  None
+    // @param:  selectedValue - Value used to attempt to restore, if possible.
     //
     // @return: None
     //
     // @remarks:None
     //
-    fileprivate func resetRelationNameOptions()
+    fileprivate func resetRelationNameOptions(selectedValue:String?) -> Void
     {
         // Initialize the postal address labels
         _selRelationLabels.removeAllItems()
@@ -522,6 +607,25 @@ class DataContentViewController: NSViewController
                         }
                     }
                     
+                    // Attempt to select the specified restore
+                    var value:String = String()
+                    if (selectedValue != nil)
+                    {
+                        value = selectedValue!
+                    }
+                    else
+                    {
+                        value = self._selRelationLabels.itemTitle(at: 0)
+                    }
+                    if (self._selRelationLabels.itemTitles.contains(value))
+                    {
+                        self._selRelationLabels.selectItem(withTitle: value)
+                        
+                        // Ensure thar the selection is persisted
+                        let defaults = UserDefaults.standard
+                        defaults.set(value, forKey: self.PERSISTENCE_KEY_SOURCE_RELATION)
+                    }
+
                     // Post a notification to update the enabled state of the UI
                     let enableUI:Notification = Notification(name: Notification.Name.HCEnableUserInterface, object: self, userInfo: nil)
                     NotificationCenter.default.post(enableUI)
@@ -607,23 +711,8 @@ class DataContentViewController: NSViewController
             }
         }
         
-        // Ensure that the first "enabled" destination item is selected.
-        for mnuItem:NSMenuItem in _selContactDestination.itemArray
-        {
-            // Is this selection enabled?
-            if (mnuItem.isEnabled)
-            {
-                // Select *this* item and quit.
-                _selContactDestination.select(mnuItem)
-                break
-            }
-        }
-
-        // Initialize the postal address options.
-        resetPostalAddressOptions()
-        
-        // Initialize the contact relation options.
-        resetRelationNameOptions()
+        // Restore the selections
+        restoreSelections()
         
         // Post a notification to update the enabled state of the UI
         let enableUI:Notification = Notification(name: Notification.Name.HCEnableUserInterface, object: self, userInfo: nil)
@@ -715,7 +804,7 @@ class DataContentViewController: NSViewController
     //
     // @return: None
     //
-    fileprivate func DisableUI() -> Void
+    @objc fileprivate func DisableUI() -> Void
     {
         // If we are disabling the UI, it is because we are busy.
         _prgBusyIndicator.startAnimation(self)
@@ -940,6 +1029,81 @@ class DataContentViewController: NSViewController
         }
         
         return name
+    }
+    
+    //
+    // @desc:   Helper to restore the user-selectable settings.
+    //
+    // @param:  None
+    //
+    // @return: None
+    //
+    // @remarks:None
+    //
+    fileprivate func restoreSelections() -> Void
+    {
+        let defaults = UserDefaults.standard
+
+        // Restore the settings.
+        let sourceContactGroup:String?      = defaults.string(forKey: PERSISTENCE_KEY_SOURCE_GROUP)
+        let sourceContactAddress:String?    = defaults.string(forKey: PERSISTENCE_KEY_SOURCE_ADDRESS)
+        let sourceContactRelation:String?   = defaults.string(forKey: PERSISTENCE_KEY_SOURCE_RELATION)
+        let destContactGroup:String?        = defaults.string(forKey: PERSISTENCE_KEY_DESTINATION_GROUP)
+        
+        // Restore the destination.
+        // ==============================================
+        // Interate over the current menu selections.
+        for mnuItem:NSMenuItem in _selContactDestination.itemArray
+        {
+            // Determine if this menu item matches the persisted one.
+            let contactSrc:HolidayCardProcessor.ContactSource? = GetContactSourceFromMenuItem(menuItem: mnuItem)
+            if (contactSrc != nil)
+            {
+                if ((destContactGroup == nil) ||
+                    (destContactGroup?.compare((contactSrc?.identifier)!) == ComparisonResult.orderedSame))
+                {
+                    // Match found. Ensure that this menu item is enabled.
+                    if (mnuItem.isEnabled)
+                    {
+                        // Ensure that this item is selected.
+                        _selContactDestination.select(mnuItem)
+                        break
+                    }
+                }
+            }
+        }
+        
+        // Restore the source group.
+        // ==============================================
+        if ((sourceContactGroup != nil) &&
+            (!(sourceContactGroup?.isEmpty)!))
+        {
+            // Interate over the current menu selections.
+            for mnuItem:NSMenuItem in _selContactSource.itemArray
+            {
+                // Determine if this menu item matches the persisted one.
+                let contactSrc:HolidayCardProcessor.ContactSource? = GetContactSourceFromMenuItem(menuItem: mnuItem)
+                if (contactSrc != nil)
+                {
+                    if (sourceContactGroup?.compare((contactSrc?.identifier)!) == ComparisonResult.orderedSame)
+                    {
+                        // Match found. Ensure that this menu item is enabled.
+                        if (mnuItem.isEnabled)
+                        {
+                            // Ensure that this item is selected.
+                            _selContactSource.select(mnuItem)
+                            break
+                        }
+                    }
+                }
+            }
+        }
+        
+        // Initialize the postal address options.
+        resetPostalAddressOptions(selectedValue: sourceContactAddress)
+        
+        // Initialize the contact relation options.
+        resetRelationNameOptions(selectedValue: sourceContactRelation)
     }
     // MARK: end Private helper methods
 }

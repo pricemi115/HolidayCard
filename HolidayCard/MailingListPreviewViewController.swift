@@ -14,6 +14,15 @@ import Cocoa
 class MailingListPreviewViewController: NSViewController
 {
     // MARK: Constants, Enumerations, & Structures.
+    //
+    // @desc: Constants for the column identifiers. Set in the Storyboard.
+    //
+    fileprivate enum ColumnIdentifiers: String
+    {
+        case ContactName      = "colId_ContactName"
+        case MailingName      = "colId_MailingName"
+        case MailingAddress   = "colId_MailingAddress"
+    }
     // MARK: end Constants, Enumerations, & Structures
     
     // MARK: Properties
@@ -144,11 +153,14 @@ class MailingListPreviewViewController: NSViewController
         let data:[HolidayCardProcessor.ContactInfo]? = notification.userInfo?[NotificationPayloadKeys.data.rawValue] as? [HolidayCardProcessor.ContactInfo]
         
         if ((data != nil) &&
-            ((data?.count)! > 0))
+            ((data?.count)! > 0) &&
+            (PreviewType != HolidayCardProcessor.ContactPreviewType.Unknown))
         {
-            // Cache the data.
-            _dataSource = data!
-            
+            // Sort & Cache the data.
+            _dataSource = data!.sorted(by: { (first:HolidayCardProcessor.ContactInfo, second:HolidayCardProcessor.ContactInfo) -> Bool in
+                return (first.contactName.compare(second.contactName) != ComparisonResult.orderedDescending)
+            })
+
             // Show our window. re-establish our constraints,
             // and initiate the data reload
             if (self.view.window != nil)
@@ -166,10 +178,27 @@ class MailingListPreviewViewController: NSViewController
                 }
                 
                 // Update the window title
-                self.view.window?.title = PreviewTypeDesc
+                self.view.window?.title = PreviewTypeDesc + " (\(_dataSource.count) contacts)"
                 
                 // Load the table data.
                 _tableView.reloadData()
+                
+                // If this is a reset view, hide all columns other than the name.
+                if (HolidayCardProcessor.ContactPreviewType.Reset == PreviewType)
+                {
+                    for column:NSTableColumn in _tableView.tableColumns
+                    {
+                        // Is this a column other than the contact name?
+                        if (ColumnIdentifiers.ContactName.rawValue.compare(column.identifier.rawValue) != ComparisonResult.orderedSame)
+                        {
+                            // Hide the column
+                            column.isHidden = true;
+                        }
+                    }
+                    
+                    // Since there will only be one column, prevent column resizing
+                    _tableView.allowsColumnResizing = false
+                }
             }
         }
         else
@@ -196,7 +225,7 @@ class MailingListPreviewViewController: NSViewController
     //
     // @param:  None
     //
-    // @return: String representation/
+    // @return: String representation
     //
     // @remarks:None
     //
@@ -215,6 +244,10 @@ class MailingListPreviewViewController: NSViewController
                 
             case HolidayCardProcessor.ContactPreviewType.Error:
                 desc = DESC_BASE + "Errors"
+                break
+                
+            case HolidayCardProcessor.ContactPreviewType.Reset:
+                desc = DESC_BASE + "Reset"
                 break
                 
             default:
@@ -261,15 +294,6 @@ extension MailingListPreviewViewController: NSTableViewDataSource
 extension MailingListPreviewViewController: NSTableViewDelegate
 {
     // MARK: Constants and Enumerations
-    //
-    // @desc: Constants for the column identifiers. Set in the Storyboard.
-    //
-    fileprivate enum ColumnIdentifiers
-    {
-        static let ContactName      = "colId_ContactName"
-        static let MailingName      = "colId_MailingName"
-        static let MailingAddress   = "colId_MailingAddress"
-    }
     // MARK: end Constants and Enumerations
     
     // MARK: Table View Delegate Implementation.
@@ -298,21 +322,22 @@ extension MailingListPreviewViewController: NSTableViewDelegate
         // Determine the actual data for this cell
         switch (columnId)
         {
-        case ColumnIdentifiers.ContactName:
+        case ColumnIdentifiers.ContactName.rawValue:
             cellValue = cellDataSource.contactName
             break
             
-        case ColumnIdentifiers.MailingName:
+        case ColumnIdentifiers.MailingName.rawValue:
             cellValue = cellDataSource.mailingName
             break
             
-        case ColumnIdentifiers.MailingAddress:
+        case ColumnIdentifiers.MailingAddress.rawValue:
             cellValue = cellDataSource.mailingAddr
             break
             
         default:
             // Error. Unknown column
             cellValue = "Unknown column"
+            break
         }
         
         // Create a cell and populate.

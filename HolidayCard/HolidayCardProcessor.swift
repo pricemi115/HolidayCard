@@ -53,6 +53,7 @@ class HolidayCardProcessor : NSObject
         case Unknown    = -1
         case Preview    = 0
         case Error      = 1
+        case Reset      = 2
     }
     //
     // @desc: Structure specifying the data representing a contact source.
@@ -130,7 +131,7 @@ class HolidayCardProcessor : NSObject
     // @return: None
     //
     // @remarks:Assumes that the destination group is only used to store the "modified"
-    // @remarks:contacts for the purpose of printing address labels.
+    // @remarks:Contacts for the purpose of printing address labels.
     //
     func FlushAllGroupContacts(sourceId: String) -> Void
     {
@@ -193,70 +194,74 @@ class HolidayCardProcessor : NSObject
     //
     // @desc:   Helper to initiate a backup of all contacts.
     //
-    // @param:  None
+    // @param:  backupPath: Path to use for the backup location.
     //
     // @return: true if successful
     //
     // @remarks:Backup is a VCard file for all contacts.
     // @remarks:File is stored in the user sandbox in a file named Backup.vcf
     //
-    func BackupContacts() -> Bool
+    func BackupContacts(backupPath:URL) -> Bool
     {
         var success:Bool = false
-
-        // List of contacts
-        var backupList:[CNContact] = [CNContact]()
         
-        // Build a list of contacts.
-        do
+        // Ensure that the backup path is valid
+        var isDirectory:ObjCBool = ObjCBool(false)
+        let fileExists = FileManager.default.fileExists(atPath: backupPath.relativePath, isDirectory: &isDirectory)
+        if (fileExists && isDirectory.boolValue)
         {
-            let contactStore = CNContactStore()
-            // All the keys for querying for the contact backup.
-            let keys = [CNContactVCardSerialization.descriptorForRequiredKeys()]
+            // List of contacts
+            var backupList:[CNContact] = [CNContact]()
             
-            // Create a fetch request for all contacts (non-unified)
-            let fetch:CNContactFetchRequest = CNContactFetchRequest(keysToFetch: keys)
-            fetch.mutableObjects = false
-            fetch.unifyResults = false
-            
-            // Get all of the contacts and construct a list.
-            try contactStore.enumerateContacts(with: fetch, usingBlock: { (contact, stop) in
-                backupList.append(contact)
-            })
-            // Validate that there are contacts to backup.
-            guard (backupList.count > 0) else
+            // Build a list of contacts.
+            do
             {
-                return false
+                let contactStore = CNContactStore()
+                // All the keys for querying for the contact backup.
+                let keys = [CNContactVCardSerialization.descriptorForRequiredKeys()]
+                
+                // Create a fetch request for all contacts (non-unified)
+                let fetch:CNContactFetchRequest = CNContactFetchRequest(keysToFetch: keys)
+                fetch.mutableObjects = false
+                fetch.unifyResults = false
+                
+                // Get all of the contacts and construct a list.
+                try contactStore.enumerateContacts(with: fetch, usingBlock: { (contact, stop) in
+                    backupList.append(contact)
+                })
+                // Validate that there are contacts to backup.
+                guard (backupList.count > 0) else
+                {
+                    return false
+                }
+                
+                // Serialize the list of contacts to data for backup storage.
+                let data:Data = try CNContactVCardSerialization.data(with: backupList)
+                
+                // Build a fully qualified path for the backup file.
+                var filePath:URL = backupPath.appendingPathComponent("Backup", isDirectory: false)
+                filePath = filePath.appendingPathExtension("vcf")
+                
+                // Write the backup file as an atomic operation.
+                try data.write(to: filePath, options: Data.WritingOptions.atomic)
+                success = true
             }
-            
-            // Serialize the list of contacts to data for backup storage.
-            let data:Data = try CNContactVCardSerialization.data(with: backupList)
-            
-            // Build a fully qualified path for the backup file.
-            let directoryURL:URL = try FileManager.default.url(for: FileManager.SearchPathDirectory.applicationSupportDirectory,
-                                                               in: FileManager.SearchPathDomainMask.userDomainMask, appropriateFor: nil, create: true)
-            var filePath:URL = directoryURL.appendingPathComponent("Backup", isDirectory: false)
-            filePath = filePath.appendingPathExtension("vcf")
-            
-            // Write the backup file as an atomic operation.
-            try data.write(to: filePath, options: Data.WritingOptions.atomic)
-            success = true
-        }
-        catch let error
-        {
-            // Get the stack trace
-            var stackTrace:String = "Stack Trace:"
-            Thread.callStackSymbols.forEach{stackTrace = stackTrace + "\n" + $0}
-            
-            let errDesc:String = "Unable to generate contact database backup. Err:" + error.localizedDescription
-            let errData:HolidayCardError = HolidayCardError(err: errDesc, stack: stackTrace, style: HolidayCardError.Style.Critical)
-            
-            // Post the error for reporting.
-            let err:[String:HolidayCardError] = [NotificationPayloadKeys.error.rawValue:errData]
-            let nc:NotificationCenter = NotificationCenter.default
-            nc.post(name: Notification.Name.HCHolidayCardError, object: nil, userInfo: err)
-            
-            success = false
+            catch let error
+            {
+                // Get the stack trace
+                var stackTrace:String = "Stack Trace:"
+                Thread.callStackSymbols.forEach{stackTrace = stackTrace + "\n" + $0}
+                
+                let errDesc:String = "Unable to generate contact database backup. Err:" + error.localizedDescription
+                let errData:HolidayCardError = HolidayCardError(err: errDesc, stack: stackTrace, style: HolidayCardError.Style.Critical)
+                
+                // Post the error for reporting.
+                let err:[String:HolidayCardError] = [NotificationPayloadKeys.error.rawValue:errData]
+                let nc:NotificationCenter = NotificationCenter.default
+                nc.post(name: Notification.Name.HCHolidayCardError, object: nil, userInfo: err)
+                
+                success = false
+            }
         }
         
         return success
@@ -282,7 +287,17 @@ class HolidayCardProcessor : NSObject
         let contactList:[CNContact] = GetFilteredContacts(sourceId: sourceId, addrSource: addrSource, relatedNameSource: relatedNameSource, valid: (ContactPreviewType.Preview == previewType))
         for contact:CNContact in contactList
         {
-            let contactName:String = contact.familyName + ", " + contact.givenName
+            var contactName:String = contact.familyName
+            if (!contact.givenName.isEmpty)
+            {
+                contactName += ", " + contact.givenName
+            }
+            // If the name is empty, it is probably a general corporation.
+            if (contactName.isEmpty &&
+                (contact.contactType == CNContactType.organization))
+            {
+                contactName = contact.organizationName
+            }
             
             var mailingName:String = String("* Missing *")
             for relation:CNLabeledValue<CNContactRelation> in contact.contactRelations
@@ -519,6 +534,12 @@ class HolidayCardProcessor : NSObject
                 }
             }
         }
+   
+        // Sort the list
+        if (labels.count > 0)
+        {
+            labels.sort(by: {$0.caseInsensitiveCompare($1) == ComparisonResult.orderedAscending})
+        }
         
         return labels
     }
@@ -552,6 +573,12 @@ class HolidayCardProcessor : NSObject
                     labels.append(localizedLabel)
                 }
             }
+        }
+        
+        // Sort the list
+        if (labels.count > 0)
+        {
+            labels.sort(by: {$0.caseInsensitiveCompare($1) == ComparisonResult.orderedAscending})
         }
         
         return labels
@@ -616,7 +643,7 @@ class HolidayCardProcessor : NSObject
     {
         get
         {
-            let authStatus: CNAuthorizationStatus = CNAuthorizationStatus.notDetermined//  CNContactStore.authorizationStatus(for: CNEntityType.contacts)
+            let authStatus: CNAuthorizationStatus = CNContactStore.authorizationStatus(for: CNEntityType.contacts)
             
             let permissionAuthorized = (authStatus == CNAuthorizationStatus.authorized)
             let permissionAlertable = !permissionAuthorized && (authStatus != CNAuthorizationStatus.denied)
@@ -707,17 +734,17 @@ class HolidayCardProcessor : NSObject
         // Get the requested source list for the holiday contacts
         let sourceContacts:[CNContact] = GetContactsFromSource(sourceId: sourceId)
         
-        // Iterate through the list of holiday contacts and create a modified
+        // Iterate through the list of contacts and create a modified
         // list suitable for label printing.
         for contact:CNContact in sourceContacts
         {
-            var holidayName: String = String()
-            var holidayAddress: CNLabeledValue<CNPostalAddress> = CNLabeledValue<CNPostalAddress>()
+            var filteredRelatedName: String = String()
+            var filteredAddress: CNLabeledValue<CNPostalAddress> = CNLabeledValue<CNPostalAddress>()
             for name:CNLabeledValue<CNContactRelation> in contact.contactRelations
             {
                 if (name.label?.caseInsensitiveCompare(relatedNameSource) == .orderedSame)
                 {
-                    holidayName = name.value.name
+                    filteredRelatedName = name.value.name
                     break
                 }
             }
@@ -725,17 +752,17 @@ class HolidayCardProcessor : NSObject
             {
                 if (address.label?.caseInsensitiveCompare(addrSource) == .orderedSame)
                 {
-                    holidayAddress = address
+                    filteredAddress = address
                     break
                 }
             }
             
             if  // Valid contacts.
                 ((valid &&
-                    ((holidayName.isEmpty == !valid) && (holidayAddress.value.street.isEmpty == !valid) && (holidayAddress.value.city.isEmpty == !valid))) ||
+                    ((filteredRelatedName.isEmpty == !valid) && (filteredAddress.value.street.isEmpty == !valid) && (filteredAddress.value.city.isEmpty == !valid))) ||
                     // Error candidates
                     (!valid &&
-                        ((holidayName.isEmpty == !valid) || (holidayAddress.value.street.isEmpty == !valid) || (holidayAddress.value.city.isEmpty == !valid))))
+                        ((filteredRelatedName.isEmpty == !valid) || (filteredAddress.value.street.isEmpty == !valid) || (filteredAddress.value.city.isEmpty == !valid))))
             {
                 filteredList.append(contact)
             }
@@ -869,7 +896,7 @@ class HolidayCardProcessor : NSObject
         if (contactPredicates.count > 0)
         {
             // Spefigy the keys that need to be acquired.
-            let keys = [CNContactNamePrefixKey, CNContactGivenNameKey, CNContactFamilyNameKey, CNContactRelationsKey, CNContactPostalAddressesKey]
+            let keys = [CNContactTypeKey, CNContactNamePrefixKey, CNContactGivenNameKey, CNContactFamilyNameKey, CNContactOrganizationNameKey, CNContactRelationsKey, CNContactPostalAddressesKey]
             
             do
             {
