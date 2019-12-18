@@ -756,14 +756,19 @@ class HolidayCardProcessor : NSObject
                 }
             }
             
-            if  // Valid contacts.
-                ((valid &&
-                    ((filteredRelatedName.isEmpty == !valid) && (filteredAddress.value.street.isEmpty == !valid) && (filteredAddress.value.city.isEmpty == !valid))) ||
-                    // Error candidates
-                    (!valid &&
-                        ((filteredRelatedName.isEmpty == !valid) || (filteredAddress.value.street.isEmpty == !valid) || (filteredAddress.value.city.isEmpty == !valid))))
+            if (
+                // Valid contacts.
+                (valid &&
+                   ((filteredRelatedName.isEmpty == !valid) && (filteredAddress.value.street.isEmpty == !valid) && (filteredAddress.value.city.isEmpty == !valid))) ||
+                // Error candidates
+                (!valid &&
+                    ((filteredRelatedName.isEmpty == !valid) || (filteredAddress.value.street.isEmpty == !valid) || (filteredAddress.value.city.isEmpty == !valid))))
             {
-                filteredList.append(contact)
+                // Filter out candidates that have one of the required settings.
+                if (!filteredRelatedName.isEmpty || !filteredAddress.value.street.isEmpty || !filteredAddress.value.city.isEmpty)
+                {
+                    filteredList.append(contact)
+                }
             }
         }
         
