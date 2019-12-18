@@ -230,6 +230,7 @@
 				TargetAttributes = {
 					5661217E1FEDE91300CB66D3 = {
 						CreatedOnToolsVersion = 9.2;
+						LastSwiftMigration = 1130;
 						ProvisioningStyle = Automatic;
 						SystemCapabilities = {
 							com.apple.Sandbox = {
@@ -239,11 +240,13 @@
 					};
 					566121901FEDE91300CB66D3 = {
 						CreatedOnToolsVersion = 9.2;
+						LastSwiftMigration = 1130;
 						ProvisioningStyle = Automatic;
 						TestTargetID = 5661217E1FEDE91300CB66D3;
 					};
 					5661219B1FEDE91300CB66D3 = {
 						CreatedOnToolsVersion = 9.2;
+						LastSwiftMigration = 1130;
 						ProvisioningStyle = Automatic;
 						TestTargetID = 5661217E1FEDE91300CB66D3;
 					};
@@ -502,7 +505,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.GrumpTech.HolidayCard;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
-				SWIFT_VERSION = 4.2;
+				SWIFT_VERSION = 5.0;
 			};
 			name = Debug;
 		};
@@ -523,7 +526,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.GrumpTech.HolidayCard;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
-				SWIFT_VERSION = 4.2;
+				SWIFT_VERSION = 5.0;
 			};
 			name = Release;
 		};
@@ -541,7 +544,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.GrumpTech.HolidayCardTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
-				SWIFT_VERSION = 4.2;
+				SWIFT_VERSION = 5.0;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/HolidayCard.app/Contents/MacOS/HolidayCard";
 			};
 			name = Debug;
@@ -560,7 +563,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.GrumpTech.HolidayCardTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
-				SWIFT_VERSION = 4.2;
+				SWIFT_VERSION = 5.0;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/HolidayCard.app/Contents/MacOS/HolidayCard";
 			};
 			name = Release;
@@ -578,7 +581,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.GrumpTech.HolidayCardUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
-				SWIFT_VERSION = 4.2;
+				SWIFT_VERSION = 5.0;
 				TEST_TARGET_NAME = HolidayCard;
 			};
 			name = Debug;
@@ -596,7 +599,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.GrumpTech.HolidayCardUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
-				SWIFT_VERSION = 4.2;
+				SWIFT_VERSION = 5.0;
 				TEST_TARGET_NAME = HolidayCard;
 			};
 			name = Release;
