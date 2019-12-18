@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		5656032A21C4B278009B543F /* AddressBook.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5656032921C4B278009B543F /* AddressBook.framework */; };
 		5660042A2001ADC5005B4781 /* NotificationExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 566004292001ADC5005B4781 /* NotificationExtensions.swift */; };
 		5660042C2001C231005B4781 /* HolidayCardErrors.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5660042B2001C231005B4781 /* HolidayCardErrors.swift */; };
 		566121831FEDE91300CB66D3 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 566121821FEDE91300CB66D3 /* AppDelegate.swift */; };
@@ -40,6 +41,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		5648352023A8647F00313732 /* HolidayCardDebug.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = HolidayCardDebug.entitlements; sourceTree = "<group>"; };
+		5656032921C4B278009B543F /* AddressBook.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AddressBook.framework; path = System/Library/Frameworks/AddressBook.framework; sourceTree = SDKROOT; };
 		566004292001ADC5005B4781 /* NotificationExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationExtensions.swift; sourceTree = "<group>"; };
 		5660042B2001C231005B4781 /* HolidayCardErrors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HolidayCardErrors.swift; sourceTree = "<group>"; };
 		5661217F1FEDE91300CB66D3 /* HolidayCard.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = HolidayCard.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -68,6 +71,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				5656032A21C4B278009B543F /* AddressBook.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -88,6 +92,14 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		5656032821C4B278009B543F /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				5656032921C4B278009B543F /* AddressBook.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		566121761FEDE91300CB66D3 = {
 			isa = PBXGroup;
 			children = (
@@ -97,6 +109,7 @@
 				566121941FEDE91300CB66D3 /* HolidayCardTests */,
 				5661219F1FEDE91300CB66D3 /* HolidayCardUITests */,
 				566121801FEDE91300CB66D3 /* Products */,
+				5656032821C4B278009B543F /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -113,6 +126,7 @@
 		566121811FEDE91300CB66D3 /* HolidayCard */ = {
 			isa = PBXGroup;
 			children = (
+				5648352023A8647F00313732 /* HolidayCardDebug.entitlements */,
 				566121821FEDE91300CB66D3 /* AppDelegate.swift */,
 				566121861FEDE91300CB66D3 /* Assets.xcassets */,
 				566121881FEDE91300CB66D3 /* Main.storyboard */,
@@ -211,7 +225,7 @@
 			isa = PBXProject;
 			attributes = {
 				LastSwiftUpdateCheck = 0920;
-				LastUpgradeCheck = 0930;
+				LastUpgradeCheck = 1130;
 				ORGANIZATIONNAME = GrumpTech;
 				TargetAttributes = {
 					5661217E1FEDE91300CB66D3 = {
@@ -391,9 +405,11 @@
 				CODE_SIGN_IDENTITY = "-";
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = NK892RB2L8;
+				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
-				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_C_LANGUAGE_STANDARD = "compiler-default";
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_OPTIMIZATION_LEVEL = 0;
@@ -450,9 +466,11 @@
 				CODE_SIGN_IDENTITY = "-";
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = NK892RB2L8;
+				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
-				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_C_LANGUAGE_STANDARD = "compiler-default";
 				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
@@ -471,17 +489,20 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGN_ENTITLEMENTS = HolidayCard/HolidayCard.entitlements;
+				CODE_SIGN_ENTITLEMENTS = HolidayCard/HolidayCardDebug.entitlements;
 				CODE_SIGN_IDENTITY = "Mac Developer";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				DEVELOPMENT_TEAM = NK892RB2L8;
+				ENABLE_HARDENED_RUNTIME = YES;
 				INFOPLIST_FILE = HolidayCard/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
+				MACOSX_DEPLOYMENT_TARGET = 10.13;
+				MARKETING_VERSION = 2.8;
 				PRODUCT_BUNDLE_IDENTIFIER = com.GrumpTech.HolidayCard;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
-				SWIFT_VERSION = 4.0;
+				SWIFT_VERSION = 4.2;
 			};
 			name = Debug;
 		};
@@ -494,12 +515,15 @@
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				DEVELOPMENT_TEAM = NK892RB2L8;
+				ENABLE_HARDENED_RUNTIME = YES;
 				INFOPLIST_FILE = HolidayCard/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
+				MACOSX_DEPLOYMENT_TARGET = 10.13;
+				MARKETING_VERSION = 2.8;
 				PRODUCT_BUNDLE_IDENTIFIER = com.GrumpTech.HolidayCard;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
-				SWIFT_VERSION = 4.0;
+				SWIFT_VERSION = 4.2;
 			};
 			name = Release;
 		};
@@ -517,7 +541,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.GrumpTech.HolidayCardTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
-				SWIFT_VERSION = 4.0;
+				SWIFT_VERSION = 4.2;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/HolidayCard.app/Contents/MacOS/HolidayCard";
 			};
 			name = Debug;
@@ -536,7 +560,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.GrumpTech.HolidayCardTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
-				SWIFT_VERSION = 4.0;
+				SWIFT_VERSION = 4.2;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/HolidayCard.app/Contents/MacOS/HolidayCard";
 			};
 			name = Release;
@@ -554,7 +578,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.GrumpTech.HolidayCardUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
-				SWIFT_VERSION = 4.0;
+				SWIFT_VERSION = 4.2;
 				TEST_TARGET_NAME = HolidayCard;
 			};
 			name = Debug;
@@ -572,7 +596,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.GrumpTech.HolidayCardUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
-				SWIFT_VERSION = 4.0;
+				SWIFT_VERSION = 4.2;
 				TEST_TARGET_NAME = HolidayCard;
 			};
 			name = Release;

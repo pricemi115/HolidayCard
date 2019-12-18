@@ -27,7 +27,7 @@ class HolidayCardTests: XCTestCase {
         // This is an example of a functional test case.
         // Use XCTAssert and related functions to verify your tests produce the correct results.
         let hc = HolidayCardProcessor()
-        let testResult: Bool = hc.requestPermission()
+        let testResult: Bool = hc.determinePermission()
         
         // Check for consistency
         XCTAssertTrue((testResult == hc.IsContactPermissionGranted.permissionGranted), "Permission Mismatch")
@@ -39,15 +39,15 @@ class HolidayCardTests: XCTestCase {
         let groupTest: String = "Temp"
         
         // Get the list before the "flush"
-        let beforeList:[CNContact] = hc.GetContactGroupContents(groupName: groupTest)
+        let beforeFlush = hc.GetGontactCount(sourceId: groupTest, addrSource: nil, relatedNameSource: nil)
 
-        hc.FlushAllGroupContacts(groupName: groupTest)
+        hc.FlushAllGroupContacts(sourceId: groupTest)
         
         // Get the list after the "flush"
-        let afterList:[CNContact] = hc.GetContactGroupContents(groupName: groupTest)
+        let afterFlush = hc.GetGontactCount(sourceId: groupTest, addrSource: nil, relatedNameSource: nil)
 
         // Determine success.
-        XCTAssertTrue(((beforeList.count>0) && (afterList.count==0)), "Contacts Flush failed. before=\(beforeList.count) after=\(afterList.count)")
+        XCTAssertTrue(((beforeFlush.totalContacts>0) && (afterFlush.totalContacts==0)), "Contacts Flush failed. before=\(beforeFlush.totalContacts) after=\(afterFlush.totalContacts)")
     }
     
     func testPerformanceExample() {
