@@ -728,6 +728,8 @@ class HolidayCardProcessor : NSObject
     //
     private func GetFilteredContacts(sourceId: String, addrSource: String, relatedNameSource: String, valid: Bool) -> [CNContact]!
     {
+        let MAX_RELATED_NAME_LENGTH:Int = 39
+        
         var filteredList:[CNContact] = [CNContact]()
         
         // Get the requested source list for the holiday contacts
@@ -759,14 +761,15 @@ class HolidayCardProcessor : NSObject
             if (
                 // Valid contacts.
                 (valid &&
-                   ((filteredRelatedName.isEmpty == !valid) && (filteredAddress.value.street.isEmpty == !valid) && (filteredAddress.value.city.isEmpty == !valid))) ||
+                    ((filteredRelatedName.isEmpty == !valid) && (filteredAddress.value.street.isEmpty == !valid) && (filteredAddress.value.city.isEmpty == !valid) && (filteredAddress.value.state.isEmpty == !valid) && (filteredAddress.value.postalCode.isEmpty == !valid))) ||
                 // Error candidates
                 (!valid &&
-                    ((filteredRelatedName.isEmpty == !valid) || (filteredAddress.value.street.isEmpty == !valid) || (filteredAddress.value.city.isEmpty == !valid))))
+                    ((filteredRelatedName.isEmpty == !valid) || (filteredRelatedName.count > MAX_RELATED_NAME_LENGTH) || (filteredAddress.value.street.isEmpty == !valid) || (filteredAddress.value.city.isEmpty == !valid) || (filteredAddress.value.state.isEmpty == !valid) || (filteredAddress.value.postalCode.isEmpty == !valid))))
             {
-                // Filter out candidates that have one of the required settings.
-                if (!filteredRelatedName.isEmpty || !filteredAddress.value.street.isEmpty || !filteredAddress.value.city.isEmpty)
+                // Filter out candidates that have none of the required settings.
+                if (!filteredRelatedName.isEmpty || !filteredAddress.value.street.isEmpty || !filteredAddress.value.city.isEmpty || !filteredAddress.value.state.isEmpty || !filteredAddress.value.postalCode.isEmpty)
                 {
+                    // Append the contact to the list.
                     filteredList.append(contact)
                 }
             }
