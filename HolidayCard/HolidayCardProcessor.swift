@@ -728,7 +728,7 @@ class HolidayCardProcessor : NSObject
     //
     private func GetFilteredContacts(sourceId: String, addrSource: String, relatedNameSource: String, valid: Bool) -> [CNContact]!
     {
-        let MAX_RELATED_NAME_LENGTH:Int = 39
+        let MAX_RELATED_NAME_LENGTH:Int = 36
         
         var filteredList:[CNContact] = [CNContact]()
         
