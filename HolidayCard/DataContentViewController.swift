@@ -137,15 +137,15 @@ class DataContentViewController: NSViewController
         var previewType:HolidayCardProcessor.ContactPreviewType = HolidayCardProcessor.ContactPreviewType.Unknown
         
         // Determine the preview type based on the segue being invoked.
-        if (segue.identifier == NSStoryboardSegue.Identifier(rawValue: MailingListSegueIds.segueIdPreview.rawValue))
+        if (segue.identifier == NSStoryboardSegue.Identifier(MailingListSegueIds.segueIdPreview.rawValue))
         {
             previewType = HolidayCardProcessor.ContactPreviewType.Preview
         }
-        else if (segue.identifier == NSStoryboardSegue.Identifier(rawValue: MailingListSegueIds.segueIdError.rawValue))
+        else if (segue.identifier == NSStoryboardSegue.Identifier(MailingListSegueIds.segueIdError.rawValue))
         {
             previewType = HolidayCardProcessor.ContactPreviewType.Error
         }
-        else if (segue.identifier == NSStoryboardSegue.Identifier(rawValue: MailingListSegueIds.segueIdReset.rawValue))
+        else if (segue.identifier == NSStoryboardSegue.Identifier(MailingListSegueIds.segueIdReset.rawValue))
         {
             previewType = HolidayCardProcessor.ContactPreviewType.Reset
         }

@@ -119,7 +119,7 @@ class HolidayCardProcessor : NSObject
                 }
             }
         }
-        
+
         return permissionStatus.permissionGranted
     }
     
@@ -525,7 +525,7 @@ class HolidayCardProcessor : NSObject
             for address:CNLabeledValue<CNPostalAddress> in contact.postalAddresses
             {
                 // Is this a "new" & valid address label?
-                let localizedLabel:String = CNLabeledValue<CNPostalAddress>.localizedString(forLabel: address.label!)
+                let localizedLabel:String = CNLabeledValue<CNPostalAddress>.localizedString(forLabel: address.label!).lowercased()
                 if (!localizedLabel.isEmpty &&
                     !labels.contains(localizedLabel))
                 {
@@ -565,7 +565,7 @@ class HolidayCardProcessor : NSObject
             for relation:CNLabeledValue<CNContactRelation> in contact.contactRelations
             {
                 // Is this a "new" & valid contact relation label?
-                let localizedLabel:String = CNLabeledValue<CNContactRelation>.localizedString(forLabel: relation.label!)
+                let localizedLabel:String = CNLabeledValue<CNContactRelation>.localizedString(forLabel: relation.label!).lowercased()
                 if (!localizedLabel.isEmpty &&
                     !labels.contains(localizedLabel))
                 {
@@ -637,7 +637,6 @@ class HolidayCardProcessor : NSObject
     //              alertable:          true if permission has not been authorized but simply requires the user to manually grant access.
     //
     // @remark: To reset the privacy permissions, use terminal to execute: tccutil reset AddressBook
-    // @remark: throws an permission exception if permissions are not yet determined.
     //
     var IsContactPermissionGranted: (permissionGranted: Bool, alertable: Bool)!
     {
@@ -729,6 +728,8 @@ class HolidayCardProcessor : NSObject
     //
     private func GetFilteredContacts(sourceId: String, addrSource: String, relatedNameSource: String, valid: Bool) -> [CNContact]!
     {
+        let MAX_RELATED_NAME_LENGTH:Int = 36
+        
         var filteredList:[CNContact] = [CNContact]()
         
         // Get the requested source list for the holiday contacts
@@ -739,7 +740,7 @@ class HolidayCardProcessor : NSObject
         for contact:CNContact in sourceContacts
         {
             var filteredRelatedName: String = String()
-            var filteredAddress: CNLabeledValue<CNPostalAddress> = CNLabeledValue<CNPostalAddress>()
+            var filteredAddress: CNLabeledValue<CNPostalAddress> = CNLabeledValue<CNPostalAddress>.init(label: nil, value: CNPostalAddress())
             for name:CNLabeledValue<CNContactRelation> in contact.contactRelations
             {
                 if (name.label?.caseInsensitiveCompare(relatedNameSource) == .orderedSame)
@@ -757,14 +758,20 @@ class HolidayCardProcessor : NSObject
                 }
             }
             
-            if  // Valid contacts.
-                ((valid &&
-                    ((filteredRelatedName.isEmpty == !valid) && (filteredAddress.value.street.isEmpty == !valid) && (filteredAddress.value.city.isEmpty == !valid))) ||
-                    // Error candidates
-                    (!valid &&
-                        ((filteredRelatedName.isEmpty == !valid) || (filteredAddress.value.street.isEmpty == !valid) || (filteredAddress.value.city.isEmpty == !valid))))
+            if (
+                // Valid contacts.
+                (valid &&
+                    ((filteredRelatedName.isEmpty == !valid) && (filteredAddress.value.street.isEmpty == !valid) && (filteredAddress.value.city.isEmpty == !valid) && (filteredAddress.value.state.isEmpty == !valid) && (filteredAddress.value.postalCode.isEmpty == !valid))) ||
+                // Error candidates
+                (!valid &&
+                    ((filteredRelatedName.isEmpty == !valid) || (filteredRelatedName.count > MAX_RELATED_NAME_LENGTH) || (filteredAddress.value.street.isEmpty == !valid) || (filteredAddress.value.city.isEmpty == !valid) || (filteredAddress.value.state.isEmpty == !valid) || (filteredAddress.value.postalCode.isEmpty == !valid))))
             {
-                filteredList.append(contact)
+                // Filter out candidates that have none of the required settings.
+                if (!filteredRelatedName.isEmpty || !filteredAddress.value.street.isEmpty || !filteredAddress.value.city.isEmpty || !filteredAddress.value.state.isEmpty || !filteredAddress.value.postalCode.isEmpty)
+                {
+                    // Append the contact to the list.
+                    filteredList.append(contact)
+                }
             }
         }
         
